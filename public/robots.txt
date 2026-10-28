@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://tadora.id.vn/sitemap.xml

@@ -3,11 +3,15 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
+  "engines": {
+    "node": "22.x"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "typecheck": "tsc -b"
+    "typecheck": "tsc -b",
+    "check": "npm run build"
   },
   "dependencies": {
     "@fontsource-variable/darker-grotesque": "^5.3.0",

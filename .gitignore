@@ -1,6 +1,7 @@
 node_modules/
 dist/
 outputs/
+.vercel/
 *.tsbuildinfo
 vite.config.js
 vite.config.d.ts

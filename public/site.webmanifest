@@ -1,0 +1,19 @@
+{
+  "name": "TADORA | DBC 2026",
+  "short_name": "TADORA",
+  "description": "Website giới thiệu đội thi TADORA tại DBC 2026.",
+  "lang": "vi",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f7f5fc",
+  "theme_color": "#262341",
+  "icons": [
+    {
+      "src": "/logo-tadora-mark.png",
+      "sizes": "580x475",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
