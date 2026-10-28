@@ -2,6 +2,7 @@ import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { ArrowDown, ArrowUp, Building2, CalendarDays, ChevronRight, ExternalLink, GraduationCap, Instagram, Menu, MousePointer2, Network, PackageOpen, Play, School, ShoppingBag, Sparkles, Target, Users, X } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { Modal } from './components/Modal'
+import { LogoLockup } from './components/LogoLockup'
 import { SectionHeading } from './components/SectionHeading'
 import { products, productCategories, type Product } from './data/products'
 import { navItems, site } from './data/site'
@@ -47,7 +48,7 @@ function App() {
     <main>
       <header className="nav-wrap">
         <a className="brand" href="#top" aria-label="TADORA — Trang chủ">
-          <img src="/logo-tadora.png" alt="Logo TADORA" />
+          <LogoLockup />
         </a>
         <nav className="desktop-nav" aria-label="Điều hướng chính">
           {navItems.map((item) => <button key={item.id} className={activeSection === item.id ? 'active' : ''} onClick={() => scrollTo(item.id)}>{item.label}</button>)}
@@ -62,7 +63,7 @@ function App() {
         <motion.div className="hero-orbit orbit-two" animate={reduceMotion ? {} : { rotate: -360 }} transition={{ duration: 32, ease: 'linear', repeat: Infinity }} />
         <div className="hero-content">
           <motion.div className="hero-kicker" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: .15 }}><Sparkles size={16} /> DBC 2026 · BÁN HÀNG ONLINE</motion.div>
-          <motion.img className="hero-logo" src="/logo-tadora.png" alt="TADORA" initial={{ opacity: 0, scale: .94 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: .8 }} />
+          <motion.img className="hero-logo" src="/logo-tadora-mark.png" alt="Biểu tượng TADORA" initial={{ opacity: 0, scale: .94 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: .8 }} />
           <motion.h1 initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .3, duration: .7 }}>From Ideas to<br /><em>Digital Impact.</em></motion.h1>
           <motion.p initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .45 }}>{site.subMessage}</motion.p>
           <motion.div className="hero-actions" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .58 }}>
@@ -147,7 +148,7 @@ function App() {
         <div className="container">
           <SectionHeading light eyebrow="06 · DIGITAL ECOSYSTEM" title="Ideas in motion. Stories in action." description="Website là điểm kết nối giữa câu chuyện đội thi, nội dung truyền thông và các kênh bán hàng được phép triển khai." />
           <div className="ecosystem">
-            <div className="eco-center"><img src="/logo-tadora.png" alt="TADORA" loading="lazy" /><span>WEBSITE HUB</span></div>
+            <div className="eco-center"><LogoLockup compact /><span>WEBSITE HUB</span></div>
             <div className="eco-item eco-facebook">f <span>Facebook<small>Đang cập nhật link</small></span></div>
             <div className="eco-item eco-instagram"><Instagram /> <span>Instagram<small>Đang cập nhật link</small></span></div>
             <div className="eco-item eco-shopee"><ShoppingBag /> <span>Shopee<small>Đang cập nhật link</small></span></div>
@@ -159,9 +160,9 @@ function App() {
 
       <footer>
         <div className="container footer-grid">
-          <div><img src="/logo-tadora.png" alt="TADORA" /><p>Một hành trình kinh doanh số của sinh viên Học viện Công nghệ Bưu chính Viễn thông.</p></div>
-          <div><span>CUỘC THI</span><strong>{site.competition}</strong><p>{site.track}</p></div>
-          <div><span>KẾT NỐI</span><strong>{site.domain}</strong><p>Facebook · Instagram · Shopee<br />Đang cập nhật</p></div>
+          <div className="footer-brand"><LogoLockup /><p>Một hành trình kinh doanh số của sinh viên Học viện Công nghệ Bưu chính Viễn thông.</p></div>
+          <div><span className="footer-label">CUỘC THI</span><strong>{site.competition}</strong><p>{site.track}</p></div>
+          <div><span className="footer-label">KẾT NỐI</span><strong>{site.domain}</strong><p>Facebook · Instagram · Shopee<br />Đang cập nhật</p></div>
           <button className="footer-cta" onClick={() => scrollTo('project')}>Khám phá dự án <ExternalLink /></button>
         </div>
         <div className="container footer-bottom"><span>© 2026 TADORA</span><p>TADORA là đội dự thi độc lập, không phải website chính thức của MAGIC hoặc Ban Tổ chức DBC.</p></div>
