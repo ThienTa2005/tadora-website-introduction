@@ -91,6 +91,8 @@ img { display: block; max-width: 100%; }
 .hero-sun { position: absolute; width: 620px; height: 620px; right: 2%; top: 3%; border-radius: 48% 52% 53% 47%; background: linear-gradient(145deg, #eaa271, #f4c79d); box-shadow: inset -25px -25px 60px rgba(101, 49, 29, .08); }
 .hero-card { margin: 0; position: absolute; overflow: hidden; padding: 8px; border: 7px solid rgba(255, 250, 243, .94); background: linear-gradient(145deg, #fffdf9, #f0dfca); box-shadow: 0 28px 70px rgba(74, 42, 24, .2); }
 .hero-card img { width: 100%; aspect-ratio: 1; object-fit: contain; border-radius: inherit; }
+.hero-product-video { position: absolute; inset: 8px 8px auto; z-index: 1; width: calc(100% - 16px); aspect-ratio: 1; object-fit: cover; border-radius: inherit; opacity: 0; transition: opacity .35s; }
+.hero-product-video.is-playing { opacity: 1; }
 .hero-card-main { width: 500px; right: 8%; top: 34px; z-index: 2; border-radius: 58px; }
 .hero-card-main figcaption { position: static; min-height: 58px; padding: 10px 14px 3px; display: flex; align-items: center; justify-content: space-between; }
 .hero-card-main figcaption span { color: var(--muted); font-size: 9px; text-transform: uppercase; letter-spacing: .1em; }

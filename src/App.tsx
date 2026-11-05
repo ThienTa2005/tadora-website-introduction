@@ -1,4 +1,4 @@
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import { AnimatePresence, motion, useMotionValue, useReducedMotion, useSpring, useTransform } from 'framer-motion'
 import {
   ArrowDown,
   ArrowRight,
@@ -17,6 +17,7 @@ import {
 import { useEffect, useMemo, useState } from 'react'
 import { LogoLockup } from './components/LogoLockup'
 import { LogoIntro } from './components/LogoIntro'
+import { HeroProductVideo } from './components/HeroProductVideo'
 import { Modal } from './components/Modal'
 import { ProductCardMedia } from './components/ProductCardMedia'
 import { SectionHeading } from './components/SectionHeading'
@@ -40,12 +41,33 @@ function App() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [category, setCategory] = useState('Tất cả')
   const [introDone, setIntroDone] = useState(!site.logoVideoReady)
+  const heroPointerX = useMotionValue(0)
+  const heroPointerY = useMotionValue(0)
+  const heroX = useSpring(heroPointerX, { stiffness: 110, damping: 22 })
+  const heroY = useSpring(heroPointerY, { stiffness: 110, damping: 22 })
+  const heroLeftX = useTransform(heroX, (value) => value * -0.65)
+  const heroLeftY = useTransform(heroY, (value) => value * 0.65)
+  const heroRightX = useTransform(heroX, (value) => value * 0.78)
+  const heroRightY = useTransform(heroY, (value) => value * -0.78)
 
   const filteredProducts = useMemo(
     () => category === 'Tất cả' ? products : products.filter((product) => product.category === category),
     [category],
   )
   const videoProducts = useMemo(() => products.filter((product) => product.video), [])
+  const heroProduct = useMemo(() => products.find((product) => product.code === 'A-028'), [])
+
+  const moveHero = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (reduceMotion || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return
+    const rect = event.currentTarget.getBoundingClientRect()
+    heroPointerX.set(((event.clientX - rect.left) / rect.width - 0.5) * 24)
+    heroPointerY.set(((event.clientY - rect.top) / rect.height - 0.5) * 24)
+  }
+
+  const resetHero = () => {
+    heroPointerX.set(0)
+    heroPointerY.set(0)
+  }
 
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
@@ -148,7 +170,7 @@ function App() {
             </motion.div>
           </motion.div>
 
-          <div className="hero-visual" aria-label="Sản phẩm nổi bật của TADORA">
+          <div className="hero-visual" aria-label="Sản phẩm nổi bật của TADORA" onPointerMove={moveHero} onPointerLeave={resetHero}>
             <motion.div
               className="hero-sun"
               animate={reduceMotion ? {} : { scale: [1, 1.05, 1], rotate: [0, 3, 0] }}
@@ -159,23 +181,23 @@ function App() {
               initial={{ opacity: 0, scale: 0.94, rotate: 1 }}
               animate={introDone ? { opacity: 1, scale: 1, rotate: -2 } : { opacity: 0, scale: 0.94, rotate: 1 }}
               transition={{ duration: 0.85, delay: 0.2 }}
+              style={{ x: heroX, y: heroY }}
             >
-              <img src="/assets/products/60.webp" alt="Quạt tích điện Magic A028" />
+              <img src="/assets/products/60.webp" alt="Quạt tích điện Magic A028" width="960" height="960" loading="eager" fetchPriority="high" />
+              <HeroProductVideo product={heroProduct} poster="/assets/products/60.webp" />
               <figcaption><span>Sản phẩm nổi bật</span><strong>Magic A028</strong></figcaption>
             </motion.figure>
             <motion.figure
               className="hero-card hero-card-left"
-              animate={reduceMotion ? {} : { y: [0, -12, 0] }}
-              transition={{ duration: 5.5, repeat: Infinity, ease: 'easeInOut' }}
+              style={{ x: heroLeftX, y: heroLeftY }}
             >
-              <img src="/assets/products/01.webp" alt="Bình giữ nhiệt Magic MPI-480" />
+              <img src="/assets/products/01.webp" alt="Bình giữ nhiệt Magic MPI-480" width="480" height="480" loading="lazy" decoding="async" />
             </motion.figure>
             <motion.figure
               className="hero-card hero-card-right"
-              animate={reduceMotion ? {} : { y: [0, 10, 0] }}
-              transition={{ duration: 6.5, repeat: Infinity, ease: 'easeInOut' }}
+              style={{ x: heroRightX, y: heroRightY }}
             >
-              <img src="/assets/products/80.webp" alt="Bàn chải điện Magic B26" />
+              <img src="/assets/products/80.webp" alt="Bàn chải điện Magic B26" width="480" height="480" loading="lazy" decoding="async" />
             </motion.figure>
             <div className="hero-seal"><Leaf /><span>Curated<br />for daily life</span></div>
           </div>
