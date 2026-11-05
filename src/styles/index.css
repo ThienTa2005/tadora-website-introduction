@@ -157,6 +157,23 @@ img { display: block; max-width: 100%; }
 .product-copy p { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.6; }
 .product-arrow { position: absolute; right: 20px; top: 23px; width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; background: var(--cream); }
 
+.showreel-section { overflow: hidden; background: var(--brown); color: #fff; }
+.showreel-heading-row { display: flex; align-items: end; justify-content: space-between; gap: 40px; }
+.showreel-heading-row .section-heading { margin-bottom: 42px; }
+.showreel-arrows { display: flex; gap: 10px; margin-bottom: 42px; }
+.showreel-arrows button { width: 48px; height: 48px; border: 1px solid rgba(255,255,255,.22); border-radius: 50%; display: grid; place-items: center; background: rgba(255,255,255,.08); color: #fff; cursor: pointer; }
+.showreel-rail { display: flex; gap: 18px; overflow-x: auto; overflow-y: hidden; padding: 4px max(0px, calc((100% - 300px) / 2)) 24px; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-inline: contain; }
+.showreel-rail::-webkit-scrollbar { display: none; }
+.showreel-card { flex: 0 0 clamp(220px, 72vw, 300px); scroll-snap-align: center; overflow: hidden; border: 1px solid rgba(255,255,255,.13); border-radius: 28px; background: rgba(255,255,255,.07); }
+.showreel-card .video-player { border-radius: 27px 27px 0 0; }
+.showreel-card__copy { padding: 20px; }
+.showreel-card__copy small { color: var(--peach); font-size: 9px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+.showreel-card__copy h3 { margin: 7px 0 18px; font: 800 27px/1 var(--display); letter-spacing: -.035em; }
+.showreel-card__copy button { min-height: 44px; padding: 0; border: 0; display: inline-flex; align-items: center; gap: 8px; background: transparent; color: #fff; font-size: 11px; font-weight: 800; cursor: pointer; }
+.showreel-dots { display: none; justify-content: center; gap: 7px; margin-top: 12px; }
+.showreel-dots span { width: 6px; height: 6px; border-radius: 999px; background: rgba(255,255,255,.3); transition: transform .25s, background .25s; }
+.showreel-dots span.active { transform: scale(1.5); background: var(--peach); }
+
 .story-band { position: relative; padding: 120px 0; overflow: hidden; background: var(--brown); color: #fff; }
 .story-band::after { content: 'TADORA'; position: absolute; right: -30px; bottom: -70px; color: rgba(255,255,255,.035); font: 900 260px/.8 var(--editorial); letter-spacing: -.05em; }
 .story-band-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 90px; position: relative; z-index: 1; }
@@ -340,6 +357,10 @@ footer { padding: 86px 0 22px; background: var(--paper-strong); }
   .product-card-featured { grid-column: auto; grid-row: auto; }
   .product-image, .product-card-featured .product-image { height: auto; aspect-ratio: 1; }
   .product-card-featured .product-copy h3 { font-size: 30px; }
+  .showreel-heading-row { display: block; }
+  .showreel-arrows { display: none; }
+  .showreel-rail { margin-inline: -14px; padding-inline: calc((100vw - clamp(220px, 72vw, 300px)) / 2); }
+  .showreel-dots { display: flex; }
   .story-band { padding: 90px 0; }
   .story-band-grid { gap: 55px; }
   .story-band h2 { font-size: 55px; }

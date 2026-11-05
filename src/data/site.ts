@@ -20,9 +20,12 @@ export const site = {
   channels: [] as { label: string; url: string }[],
 }
 
+import { readyProductVideos } from './videos'
+
 export const navItems = [
   { id: 'about', label: 'Giới thiệu' },
   { id: 'products', label: 'Sản phẩm' },
+  ...(readyProductVideos.length ? [{ id: 'showreel', label: 'Video' }] : []),
   { id: 'team', label: 'Đội ngũ' },
   { id: 'journey', label: 'Hành trình' },
 ]

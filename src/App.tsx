@@ -20,6 +20,7 @@ import { LogoIntro } from './components/LogoIntro'
 import { Modal } from './components/Modal'
 import { ProductCardMedia } from './components/ProductCardMedia'
 import { SectionHeading } from './components/SectionHeading'
+import { Showreel } from './components/Showreel'
 import { VideoPlayer } from './components/VideoPlayer'
 import { products, productCategories, type Product } from './data/products'
 import { navItems, site } from './data/site'
@@ -44,6 +45,7 @@ function App() {
     () => category === 'Tất cả' ? products : products.filter((product) => product.category === category),
     [category],
   )
+  const videoProducts = useMemo(() => products.filter((product) => product.video), [])
 
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
@@ -265,6 +267,8 @@ function App() {
         </div>
       </section>
 
+      <Showreel products={videoProducts} onSelect={setSelectedProduct} />
+
       <section className="story-band">
         <div className="container story-band-grid">
           <div>
@@ -289,7 +293,7 @@ function App() {
       <section className="section team-section" id="team">
         <div className="container">
           <SectionHeading
-            eyebrow="03 · OUR PEOPLE"
+            eyebrow="04 · OUR PEOPLE"
             title="Năm cá tính. Một nhịp chung."
             description="TADORA được tạo nên bởi những góc nhìn khác nhau, cùng gặp nhau ở tinh thần học hỏi và dám biến ý tưởng thành hành động."
           />
@@ -328,7 +332,7 @@ function App() {
         <div className="container">
           <div className="journey-heading">
             <div>
-              <span className="eyebrow">04 · OUR JOURNEY</span>
+              <span className="eyebrow">05 · OUR JOURNEY</span>
               <h2>Từng bước nhỏ.<br />Một hành trình <em>có thật.</em></h2>
             </div>
             <p>Từ khởi động đến đo lường, mỗi cột mốc là một lần đội thử, học và tiến gần hơn đến cách làm kinh doanh số chuyên nghiệp.</p>

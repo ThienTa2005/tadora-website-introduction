@@ -84,6 +84,10 @@ export function VideoPlayer({
   }, [autoPlayInView, nearViewport, play, reduceMotion])
 
   useEffect(() => {
+    if (!autoPlayInView) videoRef.current?.pause()
+  }, [autoPlayInView])
+
+  useEffect(() => {
     const onVisibilityChange = () => {
       if (document.hidden) videoRef.current?.pause()
     }
