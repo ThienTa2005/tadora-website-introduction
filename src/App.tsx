@@ -18,6 +18,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { LogoLockup } from './components/LogoLockup'
 import { LogoIntro } from './components/LogoIntro'
 import { HeroProductVideo } from './components/HeroProductVideo'
+import { ChannelLinks } from './components/ChannelLinks'
 import { Modal } from './components/Modal'
 import { ProductCardMedia } from './components/ProductCardMedia'
 import { SectionHeading } from './components/SectionHeading'
@@ -174,6 +175,7 @@ function App() {
                 Gặp đội ngũ <Users size={17} />
               </button>
             </motion.div>
+            <motion.div variants={fadeUp}><ChannelLinks className="hero-channels" /></motion.div>
           </motion.div>
 
           <div className="hero-visual" aria-label="Sản phẩm nổi bật của TADORA" onPointerMove={moveHero} onPointerLeave={resetHero}>
@@ -464,6 +466,7 @@ function App() {
           <div><span>CUỘC THI</span><strong>{site.competition}</strong><p>{site.track}</p></div>
           <div><span>WEBSITE</span><strong>{site.domain}</strong><p>From Ideas to Digital Impact.</p></div>
           <a className="footer-link" href="#products">Khám phá sản phẩm <ExternalLink size={18} /></a>
+          <ChannelLinks compact className="footer-channels" />
         </div>
         <div className="container footer-bottom">
           <span>© 2026 TADORA</span>
@@ -511,6 +514,7 @@ function App() {
                 <span className="eyebrow">{selectedProduct.category} · {selectedProduct.code}</span>
                 <h2>{selectedProduct.name}</h2>
                 <p>{selectedProduct.description}</p>
+                <ChannelLinks compact />
               </div>
               <div className="product-gallery">
                 {selectedProduct.gallery.map((image, index) => (
