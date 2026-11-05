@@ -1,17 +1,17 @@
 {
   "name": "TADORA | DBC 2026",
   "short_name": "TADORA",
-  "description": "Website giới thiệu đội thi TADORA tại DBC 2026.",
+  "description": "Hành trình kinh doanh số của đội thi TADORA và bộ sưu tập sản phẩm MAGIC tại DBC 2026.",
   "lang": "vi",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#f7f5fc",
-  "theme_color": "#262341",
+  "background_color": "#fffaf3",
+  "theme_color": "#291811",
   "icons": [
     {
-      "src": "/logo-tadora-mark.png",
-      "sizes": "580x475",
+      "src": "/logo-tadora-black.png",
+      "sizes": "2061x398",
       "type": "image/png",
       "purpose": "any"
     }

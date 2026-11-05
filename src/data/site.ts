@@ -9,9 +9,8 @@ export const site = {
 }
 
 export const navItems = [
-  { id: 'about', label: 'Nhận diện' },
-  { id: 'team', label: 'Đội thi' },
-  { id: 'project', label: 'Dự án' },
+  { id: 'about', label: 'Giới thiệu' },
+  { id: 'products', label: 'Sản phẩm' },
+  { id: 'team', label: 'Đội ngũ' },
   { id: 'journey', label: 'Hành trình' },
-  { id: 'media', label: 'Truyền thông' },
 ]
