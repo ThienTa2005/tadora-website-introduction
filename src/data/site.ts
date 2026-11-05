@@ -1,3 +1,5 @@
+import { readyProductVideos } from './videos'
+
 export const site = {
   name: 'TADORA',
   domain: 'tadora.id.vn',
@@ -10,17 +12,15 @@ export const site = {
   logoVideo: {
     landscape: {
       mp4: '/videos/logo-intro.mp4',
-      webm: '/videos/logo-intro.webm',
+      webm: undefined as string | undefined,
     },
     portrait: {
       mp4: '/videos/logo-intro-portrait.mp4',
-      webm: '/videos/logo-intro-portrait.webm',
+      webm: undefined as string | undefined,
     },
   },
   channels: [] as { label: string; url: string }[],
 }
-
-import { readyProductVideos } from './videos'
 
 export const navItems = [
   { id: 'about', label: 'Giới thiệu' },

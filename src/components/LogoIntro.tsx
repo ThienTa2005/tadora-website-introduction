@@ -35,6 +35,14 @@ export function LogoIntro({ onDone }: Props) {
     finish()
   }, [finish])
 
+  const abort = useCallback(() => {
+    if (finishedRef.current) return
+    finishedRef.current = true
+    videoRef.current?.pause()
+    setVisible(false)
+    onDone()
+  }, [onDone])
+
   useEffect(() => {
     if (!site.logoVideoReady || reduceMotion || hasSaveData()) {
       onDone()
@@ -91,7 +99,7 @@ export function LogoIntro({ onDone }: Props) {
             playsInline
             preload="auto"
             onEnded={finish}
-            onError={skip}
+            onError={abort}
           >
             {site.logoVideo.portrait.webm && <source src={site.logoVideo.portrait.webm} type="video/webm" media="(orientation: portrait)" />}
             <source src={site.logoVideo.portrait.mp4} type="video/mp4" media="(orientation: portrait)" />

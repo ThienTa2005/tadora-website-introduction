@@ -39,7 +39,7 @@ ffmpeg -i INPUT -t 4 -an -vf "scale=480:854:force_original_aspect_ratio=decrease
 ### Poster WebP
 
 ```bash
-ffmpeg -ss 0.5 -i public/videos/products/<slug>.mp4 -frames:v 1 -vf "scale=720:-2" -c:v libwebp -quality 78 public/videos/products/<slug>-poster.webp
+ffmpeg -ss 0.5 -i public/videos/products/<slug>.mp4 -frames:v 1 -vf "scale=720:-2" -c:v libwebp -q:v 78 -compression_level 4 public/videos/products/<slug>-poster.webp
 ```
 
 ### Logo ngang và dọc
@@ -49,13 +49,13 @@ ffmpeg -i LOGO_LANDSCAPE_INPUT -t 3 -an -vf "scale=1920:1080:force_original_aspe
 ffmpeg -i LOGO_PORTRAIT_INPUT -t 3 -an -vf "scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2:color=0xfffaf3,setsar=1" -c:v libx264 -preset medium -crf 28 -pix_fmt yuv420p -profile:v high -movflags +faststart public/videos/logo-intro-portrait.mp4
 ```
 
-WebM là tùy chọn; chỉ để đường dẫn WebM trong `src/data/site.ts` khi file tương ứng đã tồn tại.
+WebM là tùy chọn; đặt hai thuộc tính `webm` trong `src/data/site.ts` thành đường dẫn thật khi file tương ứng đã tồn tại.
 
 ## 3. Bật video trên website
 
 1. Chép đủ MP4 và poster vào đúng vị trí.
 2. Mở `src/data/videos.ts` và thêm slug vào `readyProductVideos`, ví dụ: `['a-028', 'b-26']`.
-3. Nếu đã chép đủ video logo, đổi `logoVideoReady` trong `src/data/site.ts` thành `true`. Nếu không có WebM, xóa hai thuộc tính `webm` để trình duyệt không yêu cầu file thiếu.
+3. Nếu đã chép đủ video logo, đổi `logoVideoReady` trong `src/data/site.ts` thành `true`. Nếu có WebM, thay hai giá trị `webm: undefined` bằng đường dẫn file; nếu không, giữ nguyên `undefined` để trình duyệt không yêu cầu file thiếu.
 4. Chạy `npm run typecheck`, sau đó `npm run build`.
 
 Website không yêu cầu bất kỳ file video nào khi mảng readiness rỗng và `logoVideoReady` là `false`.
