@@ -20,6 +20,7 @@ import { LogoIntro } from './components/LogoIntro'
 import { Modal } from './components/Modal'
 import { ProductCardMedia } from './components/ProductCardMedia'
 import { SectionHeading } from './components/SectionHeading'
+import { VideoPlayer } from './components/VideoPlayer'
 import { products, productCategories, type Product } from './data/products'
 import { navItems, site } from './data/site'
 import { team, type Member } from './data/team'
@@ -435,23 +436,31 @@ function App() {
         )}
       </Modal>
 
-      <Modal open={!!selectedProduct} title="Bộ ảnh sản phẩm" onClose={() => setSelectedProduct(null)}>
+      <Modal open={!!selectedProduct} title="Ảnh & video sản phẩm" onClose={() => setSelectedProduct(null)}>
         {selectedProduct && (
-          <div className="product-modal">
-            <div className="product-modal-heading">
-              <span className="eyebrow">{selectedProduct.category} · {selectedProduct.code}</span>
-              <h2>{selectedProduct.name}</h2>
-              <p>{selectedProduct.description}</p>
-            </div>
-            <div className="product-gallery">
-              {selectedProduct.gallery.map((image, index) => (
-                <img
-                  key={image}
-                  src={image}
-                  alt={selectedProduct.name + ' — hình ' + (index + 1)}
-                  loading={index < 2 ? 'eager' : 'lazy'}
-                />
-              ))}
+          <div className={`product-modal ${selectedProduct.video ? 'product-modal--video' : ''}`}>
+            {selectedProduct.video && (
+              <div className="product-modal-video">
+                <VideoPlayer src={selectedProduct.video.src} poster={selectedProduct.video.poster} ratio="9/16" loop autoPlayInView />
+              </div>
+            )}
+            <div className="product-modal-content">
+              <div className="product-modal-heading">
+                <span className="eyebrow">{selectedProduct.category} · {selectedProduct.code}</span>
+                <h2>{selectedProduct.name}</h2>
+                <p>{selectedProduct.description}</p>
+              </div>
+              <div className="product-gallery">
+                {selectedProduct.gallery.map((image, index) => (
+                  <img
+                    key={image}
+                    src={image}
+                    alt={selectedProduct.name + ' — hình ' + (index + 1)}
+                    loading={index < 2 ? 'eager' : 'lazy'}
+                    decoding="async"
+                  />
+                ))}
+              </div>
             </div>
           </div>
         )}
