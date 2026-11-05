@@ -1,8 +1,14 @@
+import type { SyntheticEvent } from 'react'
+
 type ImageKind = 'product' | 'team'
 
 const variant = (src: string, width: number) => src.replace(/\.webp$/i, `-${width}.webp`)
 
 export const imageVariant = variant
+
+export const markLazyImageLoaded = (event: SyntheticEvent<HTMLImageElement>) => {
+  event.currentTarget.classList.add('is-loaded')
+}
 
 export const responsiveImage = (src: string, kind: ImageKind) => {
   if (kind === 'product') {

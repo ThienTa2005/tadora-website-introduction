@@ -2,7 +2,7 @@ import { Play } from 'lucide-react'
 import { useReducedMotion } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
 import type { Product } from '../data/products'
-import { responsiveImage } from '../lib/images'
+import { markLazyImageLoaded, responsiveImage } from '../lib/images'
 
 type Props = { product: Product; featured?: boolean }
 type NavigatorWithConnection = Navigator & { connection?: { saveData?: boolean } }
@@ -101,6 +101,7 @@ export function ProductCardMedia({ product, featured = false }: Props) {
   return (
     <div ref={rootRef} className="product-image">
       <img
+        className="lazy-image"
         src={image.src}
         srcSet={image.srcSet}
         sizes={featured ? '(min-width: 1051px) 48vw, (min-width: 721px) 50vw, calc(100vw - 28px)' : '(min-width: 1051px) 24vw, (min-width: 721px) 50vw, calc(100vw - 28px)'}
@@ -109,6 +110,7 @@ export function ProductCardMedia({ product, featured = false }: Props) {
         height="960"
         loading="lazy"
         decoding="async"
+        onLoad={markLazyImageLoaded}
       />
       {product.video && !failed && (
         <>

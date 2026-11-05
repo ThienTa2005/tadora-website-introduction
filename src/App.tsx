@@ -4,7 +4,6 @@ import {
   ArrowRight,
   CalendarDays,
   ChevronRight,
-  ExternalLink,
   Leaf,
   Menu,
   School,
@@ -16,7 +15,7 @@ import {
 } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { LogoLockup } from './components/LogoLockup'
-import { LogoIntro } from './components/LogoIntro'
+import { NavLogoMotion } from './components/NavLogoMotion'
 import { HeroProductVideo } from './components/HeroProductVideo'
 import { ChannelLinks } from './components/ChannelLinks'
 import { Modal } from './components/Modal'
@@ -28,12 +27,21 @@ import { products, productCategories, type Product } from './data/products'
 import { navItems, site } from './data/site'
 import { team, type Member } from './data/team'
 import { timeline } from './data/timeline'
-import { imageVariant, responsiveImage } from './lib/images'
+import { imageVariant, markLazyImageLoaded, responsiveImage } from './lib/images'
 
 const fadeUp = {
   hidden: { opacity: 0, y: 28 },
   visible: { opacity: 1, y: 0 },
 }
+
+const journeyIcons = [Sparkles, School, Target, Zap, CalendarDays] as const
+
+const introFacts = [
+  { Icon: School, label: 'Đơn vị', value: 'PTIT', detail: 'Học viện Công nghệ Bưu chính Viễn thông', accent: false },
+  { Icon: Target, label: 'Nội dung dự thi', value: '01', detail: 'Bán hàng Online', accent: false },
+  { Icon: CalendarDays, label: 'Hành trình', value: '2026', detail: 'Từ 01.10 đến 05.12', accent: false },
+  { Icon: Zap, label: 'Tinh thần', value: 'Make it real.', detail: 'Từ ý tưởng đến tác động số', accent: true },
+] as const
 
 function App() {
   const reduceMotion = useReducedMotion()
@@ -42,7 +50,7 @@ function App() {
   const [selectedMember, setSelectedMember] = useState<Member | null>(null)
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [category, setCategory] = useState('Tất cả')
-  const [introDone, setIntroDone] = useState(!site.logoVideoReady)
+  const [activeJourneyStep, setActiveJourneyStep] = useState(0)
   const heroPointerX = useMotionValue(0)
   const heroPointerY = useMotionValue(0)
   const heroX = useSpring(heroPointerX, { stiffness: 110, damping: 22 })
@@ -76,22 +84,41 @@ function App() {
   }
 
   useEffect(() => {
-    const observer = new IntersectionObserver((entries) => {
-      const visible = entries
-        .filter((entry) => entry.isIntersecting)
-        .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0]
-      if (visible) setActiveSection(visible.target.id)
-    }, { rootMargin: '-25% 0px -60%', threshold: [0.1, 0.35, 0.7] })
+    let frame = 0
 
-    navItems.forEach(({ id }) => {
-      const section = document.getElementById(id)
-      if (section) observer.observe(section)
-    })
+    const syncActiveSection = () => {
+      frame = 0
+      const marker = window.scrollY + window.innerHeight * .38
+      const sections = navItems
+        .map(({ id }) => ({ id, element: document.getElementById(id) }))
+        .filter((section): section is { id: string; element: HTMLElement } => !!section.element)
 
-    return () => observer.disconnect()
+      let currentId = sections[0]?.id ?? 'about'
+      sections.forEach(({ id, element }) => {
+        if (element.offsetTop <= marker) currentId = id
+      })
+
+      const atPageEnd = window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 4
+      if (atPageEnd && sections.length) currentId = sections[sections.length - 1].id
+      setActiveSection(currentId)
+    }
+
+    const scheduleSync = () => {
+      if (!frame) frame = window.requestAnimationFrame(syncActiveSection)
+    }
+
+    syncActiveSection()
+    window.addEventListener('scroll', scheduleSync, { passive: true })
+    window.addEventListener('resize', scheduleSync)
+    return () => {
+      if (frame) window.cancelAnimationFrame(frame)
+      window.removeEventListener('scroll', scheduleSync)
+      window.removeEventListener('resize', scheduleSync)
+    }
   }, [])
 
   const scrollTo = (id: string) => {
+    setActiveSection(id)
     document.getElementById(id)?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth' })
     setMenuOpen(false)
   }
@@ -99,10 +126,9 @@ function App() {
   return (
     <main>
       <motion.div className="scroll-progress" style={{ scaleX: scrollProgress }} aria-hidden="true" />
-      <LogoIntro onDone={() => setIntroDone(true)} />
       <header className="nav-wrap">
         <a className="brand" href="#top" aria-label="TADORA — Trang chủ">
-          <LogoLockup />
+          <NavLogoMotion />
         </a>
         <nav className="desktop-nav" aria-label="Điều hướng chính">
           {navItems.map((item) => (
@@ -135,7 +161,11 @@ function App() {
               exit={{ opacity: 0, y: -10 }}
             >
               {navItems.map((item) => (
-                <button key={item.id} onClick={() => scrollTo(item.id)}>
+                <button
+                  key={item.id}
+                  className={activeSection === item.id ? 'active' : ''}
+                  onClick={() => scrollTo(item.id)}
+                >
                   {item.label}<ChevronRight size={18} />
                 </button>
               ))}
@@ -150,7 +180,7 @@ function App() {
           <motion.div
             className="hero-copy"
             initial="hidden"
-            animate={introDone ? 'visible' : 'hidden'}
+            animate="visible"
             variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
           >
             <motion.div className="hero-kicker" variants={fadeUp}>
@@ -163,6 +193,7 @@ function App() {
               Tiện nghi hơn.<br />
               <em>Sống chất hơn.</em>
             </motion.h1>
+            <motion.p className="hero-slogan" variants={fadeUp}>{site.message}</motion.p>
             <motion.p className="hero-lead" variants={fadeUp}>
               Hành trình kinh doanh số của sinh viên PTIT — nơi ý tưởng trẻ gặp những sản phẩm
               tiện ích được kể bằng một ngôn ngữ gần gũi, tươi mới.
@@ -175,7 +206,6 @@ function App() {
                 Gặp đội ngũ <Users size={17} />
               </button>
             </motion.div>
-            <motion.div variants={fadeUp}><ChannelLinks className="hero-channels" /></motion.div>
           </motion.div>
 
           <div className="hero-visual" aria-label="Sản phẩm nổi bật của TADORA" onPointerMove={moveHero} onPointerLeave={resetHero}>
@@ -187,7 +217,7 @@ function App() {
             <motion.figure
               className="hero-card hero-card-main"
               initial={{ opacity: 0, scale: 0.94, rotate: 1 }}
-              animate={introDone ? { opacity: 1, scale: 1, rotate: -2 } : { opacity: 0, scale: 0.94, rotate: 1 }}
+              animate={{ opacity: 1, scale: 1, rotate: -2 }}
               transition={{ duration: 0.85, delay: 0.2 }}
               style={{ x: heroX, y: heroY }}
             >
@@ -199,7 +229,6 @@ function App() {
                 width="960"
                 height="960"
                 loading="eager"
-                fetchPriority="high"
               />
               <HeroProductVideo product={heroProduct} poster={imageVariant('/assets/products/60.webp', 960)} />
               <figcaption><span>Sản phẩm nổi bật</span><strong>Magic A028</strong></figcaption>
@@ -208,13 +237,13 @@ function App() {
               className="hero-card hero-card-left"
               style={{ x: heroLeftX, y: heroLeftY }}
             >
-              <img src={imageVariant('/assets/products/01.webp', 480)} srcSet={responsiveImage('/assets/products/01.webp', 'product').srcSet} sizes="210px" alt="Bình giữ nhiệt Magic MPI-480" width="480" height="480" loading="lazy" decoding="async" />
+              <img className="lazy-image" src={imageVariant('/assets/products/01.webp', 480)} srcSet={responsiveImage('/assets/products/01.webp', 'product').srcSet} sizes="210px" alt="Bình giữ nhiệt Magic MPI-480" width="480" height="480" loading="lazy" decoding="async" onLoad={markLazyImageLoaded} />
             </motion.figure>
             <motion.figure
               className="hero-card hero-card-right"
               style={{ x: heroRightX, y: heroRightY }}
             >
-              <img src={imageVariant('/assets/products/80.webp', 480)} srcSet={responsiveImage('/assets/products/80.webp', 'product').srcSet} sizes="220px" alt="Bàn chải điện Magic B26" width="480" height="480" loading="lazy" decoding="async" />
+              <img className="lazy-image" src={imageVariant('/assets/products/80.webp', 480)} srcSet={responsiveImage('/assets/products/80.webp', 'product').srcSet} sizes="220px" alt="Bàn chải điện Magic B26" width="480" height="480" loading="lazy" decoding="async" onLoad={markLazyImageLoaded} />
             </motion.figure>
             <div className="hero-seal"><Leaf /><span>Curated<br />for daily life</span></div>
           </div>
@@ -229,6 +258,8 @@ function App() {
       </section>
 
       <section className="section intro-section" id="about">
+        <span className="intro-ambient intro-ambient-one" aria-hidden="true" />
+        <span className="intro-ambient intro-ambient-two" aria-hidden="true" />
         <div className="container">
           <div className="intro-grid">
             <motion.div
@@ -240,23 +271,45 @@ function App() {
             >
               <span className="eyebrow">01 · CÂU CHUYỆN TADORA</span>
               <h2>Một gian hàng.<br />Một hành trình <em>rất trẻ.</em></h2>
+              <div className="intro-sticky-foot"><Sparkles /><span>PTIT · DBC 2026</span></div>
             </motion.div>
-            <div className="intro-content">
-              <p className="intro-big">
+            <motion.div
+              className="intro-content"
+              initial={reduceMotion ? false : { opacity: 0, y: 28 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ duration: 0.65 }}
+            >
+              <motion.p className="intro-big" initial={reduceMotion ? false : { opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
                 TADORA là đội sinh viên Học viện Công nghệ Bưu chính Viễn thông tham gia
                 Cuộc thi Sinh viên Kinh doanh số 2026.
-              </p>
+              </motion.p>
               <p>
                 Chúng mình đưa kiến thức trên giảng đường vào trải nghiệm kinh doanh thực tế:
                 từ nghiên cứu sản phẩm, xây dựng nội dung đến vận hành một hệ sinh thái bán hàng số.
               </p>
               <div className="fact-grid">
-                <article><School /><span>Đơn vị</span><strong>PTIT</strong><small>Học viện Công nghệ Bưu chính Viễn thông</small></article>
-                <article><Target /><span>Nội dung dự thi</span><strong>01</strong><small>Bán hàng Online</small></article>
-                <article><CalendarDays /><span>Hành trình</span><strong>2026</strong><small>Từ 01.10 đến 05.12</small></article>
-                <article className="fact-accent"><Zap /><span>Tinh thần</span><strong>Make it real.</strong><small>Từ ý tưởng đến tác động số</small></article>
+                {introFacts.map(({ Icon, label, value, detail, ...fact }, index) => (
+                  <motion.article
+                    key={label}
+                    className={fact.accent ? 'fact-accent' : ''}
+                    initial={reduceMotion ? false : { opacity: 0, y: 24, rotate: index % 2 ? 1.5 : -1.5 }}
+                    whileInView={{ opacity: 1, y: 0, rotate: 0 }}
+                    viewport={{ once: true, amount: 0.3 }}
+                    transition={{ delay: reduceMotion ? 0 : index * 0.08 }}
+                    whileHover={reduceMotion ? undefined : { y: -9, rotate: index % 2 ? 1 : -1 }}
+                    whileTap={reduceMotion ? undefined : { scale: 0.97 }}
+                  >
+                    <span className="fact-index">{String(index + 1).padStart(2, '0')}</span>
+                    <span className="fact-icon"><Icon /></span>
+                    <span className="fact-label">{label}</span>
+                    <strong>{value}</strong>
+                    <small>{detail}</small>
+                    <span className="fact-shine" aria-hidden="true" />
+                  </motion.article>
+                ))}
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
@@ -309,21 +362,40 @@ function App() {
       <Showreel products={videoProducts} onSelect={setSelectedProduct} />
 
       <section className="story-band">
+        <span className="story-orb story-orb-one" aria-hidden="true" />
+        <span className="story-orb story-orb-two" aria-hidden="true" />
         <div className="container story-band-grid">
-          <div>
+          <motion.div
+            className="story-copy"
+            initial={reduceMotion ? false : { opacity: 0, x: -28 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, amount: 0.35 }}
+          >
             <span className="eyebrow">KHÔNG CHỈ LÀ MỘT GIAN HÀNG</span>
             <h2>Học bằng cách<br /><em>thực sự bắt tay làm.</em></h2>
-          </div>
+            <p className="story-lead">Mỗi bước đều được thử nghiệm bằng công việc thật, dữ liệu thật và những lần điều chỉnh thật.</p>
+            <div className="story-signal"><span /><strong>LEARN · BUILD · IMPROVE</strong></div>
+          </motion.div>
           <div className="story-steps">
             {[
               ['01', 'Research', 'Hiểu sản phẩm, thị trường và khách hàng.'],
               ['02', 'Strategy', 'Định hình nội dung và trải nghiệm thương hiệu.'],
               ['03', 'Execution', 'Triển khai kênh và vận hành bán hàng số.'],
               ['04', 'Measure', 'Quan sát dữ liệu, học hỏi và cải tiến.'],
-            ].map(([number, title, description]) => (
-              <article key={number}>
-                <span>{number}</span><div><h3>{title}</h3><p>{description}</p></div>
-              </article>
+            ].map(([number, title, description], index) => (
+              <motion.article
+                key={number}
+                initial={reduceMotion ? false : { opacity: 0, x: 24 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, amount: 0.4 }}
+                transition={{ delay: reduceMotion ? 0 : index * 0.08 }}
+                whileHover={reduceMotion ? undefined : { x: 10, scale: 1.01 }}
+                whileTap={reduceMotion ? undefined : { scale: 0.98 }}
+              >
+                <span className="story-step-number">{number}</span>
+                <div><h3>{title}</h3><p>{description}</p></div>
+                <span className="story-step-arrow"><ArrowRight /></span>
+              </motion.article>
             ))}
           </div>
         </div>
@@ -332,7 +404,7 @@ function App() {
       <section className="section team-section" id="team">
         <div className="container">
           <SectionHeading
-            eyebrow="04 · OUR PEOPLE"
+            eyebrow="03 · OUR PEOPLE"
             title="Năm cá tính. Một nhịp chung."
             description="TADORA được tạo nên bởi những góc nhìn khác nhau, cùng gặp nhau ở tinh thần học hỏi và dám biến ý tưởng thành hành động."
           />
@@ -355,6 +427,8 @@ function App() {
                   width={member.imageWidth}
                   height={member.imageHeight}
                   loading="lazy"
+                className="lazy-image"
+                onLoad={markLazyImageLoaded}
                   style={{ objectPosition: member.imagePosition }}
                 />
                 <div className="member-shade" />
@@ -375,25 +449,75 @@ function App() {
         <div className="container">
           <div className="journey-heading">
             <div>
-              <span className="eyebrow">05 · OUR JOURNEY</span>
+              <span className="eyebrow">04 · OUR JOURNEY</span>
               <h2>Từng bước nhỏ.<br />Một hành trình <em>có thật.</em></h2>
             </div>
             <p>Từ khởi động đến đo lường, mỗi cột mốc là một lần đội thử, học và tiến gần hơn đến cách làm kinh doanh số chuyên nghiệp.</p>
           </div>
+          <motion.div
+            className="journey-live"
+            initial={reduceMotion ? false : { opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.35 }}
+          >
+            <div className="journey-live-index" aria-hidden="true">
+              <span>BƯỚC</span>
+              <strong>{String(activeJourneyStep + 1).padStart(2, '0')}</strong>
+              <small>/ {String(timeline.length).padStart(2, '0')}</small>
+            </div>
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                className="journey-live-copy"
+                key={timeline[activeJourneyStep].label}
+                initial={reduceMotion ? false : { opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={reduceMotion ? undefined : { opacity: 0, y: -10 }}
+                transition={{ duration: 0.25 }}
+                aria-live="polite"
+              >
+                <small>{timeline[activeJourneyStep].state === 'in-progress' ? 'ĐANG TRIỂN KHAI' : 'KẾ HOẠCH 2026'}</small>
+                <h3>{timeline[activeJourneyStep].label}</h3>
+                <p>{timeline[activeJourneyStep].detail}</p>
+              </motion.div>
+            </AnimatePresence>
+          </motion.div>
           <div className="timeline" ref={timelineRef}>
             <motion.span className="timeline-progress" style={{ scaleY: timelineScroll }} aria-hidden="true" />
-            {timeline.map((item, index) => (
-              <motion.article
-                key={item.label}
-                initial={{ opacity: 0, x: -18 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true, amount: 0.5 }}
-                transition={{ delay: index * 0.08 }}
-              >
-                <span className={'timeline-node ' + item.state}>{String(index + 1).padStart(2, '0')}</span>
-                <div><small>{item.state === 'in-progress' ? 'ĐANG TRIỂN KHAI' : 'KẾ HOẠCH 2026'}</small><h3>{item.label}</h3><p>{item.detail}</p></div>
-              </motion.article>
-            ))}
+            {timeline.map((item, index) => {
+              const JourneyIcon = journeyIcons[index]
+              const isActive = activeJourneyStep === index
+              return (
+                <motion.article
+                  key={item.label}
+                  className={`${isActive ? 'is-active' : ''} ${index < activeJourneyStep ? 'is-complete' : ''}`}
+                  initial={reduceMotion ? false : { opacity: 0, y: 22 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.35 }}
+                  transition={{ delay: reduceMotion ? 0 : index * 0.07 }}
+                  onPointerEnter={() => setActiveJourneyStep(index)}
+                >
+                  <motion.button
+                    type="button"
+                    className="timeline-step"
+                    aria-pressed={isActive}
+                    onClick={() => setActiveJourneyStep(index)}
+                    onFocus={() => setActiveJourneyStep(index)}
+                    whileTap={reduceMotion ? undefined : { scale: 0.97 }}
+                  >
+                    <span className={'timeline-node ' + item.state}>{String(index + 1).padStart(2, '0')}</span>
+                    <span className="timeline-card">
+                      <span className="timeline-card-top">
+                        <small>{item.state === 'in-progress' ? 'ĐANG TRIỂN KHAI' : 'KẾ HOẠCH 2026'}</small>
+                        <span className="timeline-card-icon"><JourneyIcon /></span>
+                      </span>
+                      <strong>{item.label}</strong>
+                      <span className="timeline-card-detail">{item.detail}</span>
+                      <span className="timeline-card-cta">Khám phá bước này <ArrowRight /></span>
+                    </span>
+                  </motion.button>
+                </motion.article>
+              )
+            })}
           </div>
         </div>
       </section>
@@ -404,7 +528,7 @@ function App() {
             <span className="closing-orbit closing-orbit-one" />
             <span className="closing-orbit closing-orbit-two" />
             <motion.img
-              className="closing-product closing-product-main"
+              className="closing-product closing-product-main lazy-image"
               src={responsiveImage('/assets/products/50.webp', 'product').src}
               srcSet={responsiveImage('/assets/products/50.webp', 'product').srcSet}
               sizes="(min-width: 721px) 360px, 225px"
@@ -412,11 +536,12 @@ function App() {
               height="960"
               alt=""
               loading="lazy"
+              onLoad={markLazyImageLoaded}
               animate={reduceMotion ? {} : { y: [0, -10, 0], rotate: [-5, -3, -5] }}
               transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
             />
             <motion.img
-              className="closing-product closing-product-top"
+              className="closing-product closing-product-top lazy-image"
               src={responsiveImage('/assets/products/62.webp', 'product').src}
               srcSet={responsiveImage('/assets/products/62.webp', 'product').srcSet}
               sizes="(min-width: 721px) 225px, 135px"
@@ -424,11 +549,12 @@ function App() {
               height="960"
               alt=""
               loading="lazy"
+              onLoad={markLazyImageLoaded}
               animate={reduceMotion ? {} : { y: [0, 8, 0], rotate: [7, 5, 7] }}
               transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
             />
             <motion.img
-              className="closing-product closing-product-bottom"
+              className="closing-product closing-product-bottom lazy-image"
               src={responsiveImage('/assets/products/76.webp', 'product').src}
               srcSet={responsiveImage('/assets/products/76.webp', 'product').srcSet}
               sizes="(min-width: 721px) 210px, 130px"
@@ -436,6 +562,7 @@ function App() {
               height="960"
               alt=""
               loading="lazy"
+              onLoad={markLazyImageLoaded}
               animate={reduceMotion ? {} : { y: [0, -7, 0], rotate: [4, 6, 4] }}
               transition={{ duration: 6.5, repeat: Infinity, ease: 'easeInOut' }}
             />
@@ -460,18 +587,47 @@ function App() {
         </div>
       </section>
 
-      <footer>
-        <div className="container footer-grid">
-          <div className="footer-brand"><LogoLockup /><p>Một hành trình kinh doanh số của sinh viên PTIT.</p></div>
-          <div><span>CUỘC THI</span><strong>{site.competition}</strong><p>{site.track}</p></div>
-          <div><span>WEBSITE</span><strong>{site.domain}</strong><p>From Ideas to Digital Impact.</p></div>
-          <a className="footer-link" href="#products">Khám phá sản phẩm <ExternalLink size={18} /></a>
-          <ChannelLinks compact className="footer-channels" />
-        </div>
-        <div className="container footer-bottom">
-          <span>© 2026 TADORA</span>
-          <p>TADORA là đội dự thi độc lập, không phải website chính thức của MAGIC hoặc Ban Tổ chức DBC.</p>
-        </div>
+      <footer id="about-us">
+        <motion.div
+          className="container footer-panel"
+          initial={reduceMotion ? false : { opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.16 }}
+        >
+          <div className="footer-grid">
+            <div className="footer-brand">
+              <LogoLockup />
+              <p>Một hành trình kinh doanh số của sinh viên PTIT.</p>
+              <strong>{site.message}</strong>
+            </div>
+            <div className="footer-info">
+              <span>VỀ CHÚNG TÔI</span>
+              <strong>Sinh viên PTIT · DBC 2026</strong>
+              <p>{site.subMessage}</p>
+            </div>
+            <div className="footer-info">
+              <span>CUỘC THI</span>
+              <strong>{site.competition}</strong>
+              <p>{site.track}</p>
+            </div>
+            <div className="footer-visit">
+              <span>WEBSITE</span>
+              <strong>{site.domain}</strong>
+              <button className="footer-link" onClick={() => scrollTo('products')}>Khám phá sản phẩm <ArrowRight size={17} /></button>
+            </div>
+          </div>
+
+          <div className="footer-socials">
+            <div><span>KẾT NỐI VỚI TADORA</span><p>Mua sắm và theo dõi hành trình của chúng mình.</p></div>
+            <ChannelLinks compact className="footer-channels" />
+          </div>
+
+          <div className="footer-bottom">
+            <span>© 2026 TADORA</span>
+            <button onClick={() => scrollTo('top')}>Trở về đầu trang</button>
+            <p>TADORA là đội dự thi độc lập, không phải website chính thức của MAGIC hoặc Ban Tổ chức DBC.</p>
+          </div>
+        </motion.div>
       </footer>
 
       <Modal open={!!selectedMember} title="Thông tin thành viên" onClose={() => setSelectedMember(null)}>
@@ -523,6 +679,8 @@ function App() {
                     src={imageVariant(image, 960)}
                     alt={selectedProduct.name + ' — hình ' + (index + 1)}
                     loading={index < 2 ? 'eager' : 'lazy'}
+                    className={index < 2 ? undefined : 'lazy-image'}
+                    onLoad={index < 2 ? undefined : markLazyImageLoaded}
                     decoding="async"
                     width="960"
                     height="960"

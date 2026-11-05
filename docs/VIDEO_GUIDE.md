@@ -12,11 +12,11 @@ Mỗi sản phẩm dùng:
 - Poster: `public/videos/products/<slug>-poster.webp`.
 - Preview tùy chọn: `public/videos/products/<slug>-preview.mp4` — 9:16, 480p, 3–4 giây, mục tiêu tối đa 500 KB. Muốn dùng preview, thêm thuộc tính `preview` trong helper tại `src/data/products.ts`; nếu không, thẻ hover dùng video chính.
 
-Logo intro dùng:
+Video nhận diện TADORA dùng:
 
-- `public/videos/logo-intro.mp4` — 16:9.
-- `public/videos/logo-intro-portrait.mp4` — 9:16.
-- Có thể thêm hai file WebM cùng tên. Nền video là `#fffaf3`, không tiếng, dài khoảng 3 giây.
+- `public/videos/logo-intro.mp4` — 16:9, phát một lần trong vùng logo của thanh điều hướng mỗi khi tải hoặc tải lại trang.
+- WebM là tùy chọn. Nền video là `#fffaf3`, không tiếng, dài khoảng 3 giây và file nên dưới 2 MB.
+- Khi video kết thúc, giao diện chuyển sang ảnh logo tĩnh. Reduce Motion hoặc Data Saver sẽ bỏ qua video và hiển thị logo tĩnh ngay.
 
 ## 2. Lệnh ffmpeg tham khảo
 
@@ -42,20 +42,19 @@ ffmpeg -i INPUT -t 4 -an -vf "scale=480:854:force_original_aspect_ratio=decrease
 ffmpeg -ss 0.5 -i public/videos/products/<slug>.mp4 -frames:v 1 -vf "scale=720:-2" -c:v libwebp -q:v 78 -compression_level 4 public/videos/products/<slug>-poster.webp
 ```
 
-### Logo ngang và dọc
+### Video nhận diện
 
 ```bash
-ffmpeg -i LOGO_LANDSCAPE_INPUT -t 3 -an -vf "scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2:color=0xfffaf3,setsar=1" -c:v libx264 -preset medium -crf 28 -pix_fmt yuv420p -profile:v high -movflags +faststart public/videos/logo-intro.mp4
-ffmpeg -i LOGO_PORTRAIT_INPUT -t 3 -an -vf "scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2:color=0xfffaf3,setsar=1" -c:v libx264 -preset medium -crf 28 -pix_fmt yuv420p -profile:v high -movflags +faststart public/videos/logo-intro-portrait.mp4
+ffmpeg -i LOGO_LANDSCAPE_INPUT -t 4 -an -vf "scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2:color=0xfffaf3,setsar=1" -c:v libx264 -preset medium -crf 29 -pix_fmt yuv420p -profile:v high -movflags +faststart public/videos/logo-intro.mp4
 ```
 
-WebM là tùy chọn; đặt hai thuộc tính `webm` trong `src/data/site.ts` thành đường dẫn thật khi file tương ứng đã tồn tại.
+WebM là tùy chọn; đặt thuộc tính `landscape.webm` trong `src/data/site.ts` thành đường dẫn thật khi file tương ứng đã tồn tại.
 
 ## 3. Bật video trên website
 
 1. Chép đủ MP4 và poster vào đúng vị trí.
 2. Mở `src/data/videos.ts` và thêm slug vào `readyProductVideos`, ví dụ: `['a-028', 'b-26']`.
-3. Nếu đã chép đủ video logo, đổi `logoVideoReady` trong `src/data/site.ts` thành `true`. Nếu có WebM, thay hai giá trị `webm: undefined` bằng đường dẫn file; nếu không, giữ nguyên `undefined` để trình duyệt không yêu cầu file thiếu.
+3. Nếu đã chép video nhận diện, đổi `logoVideoReady` trong `src/data/site.ts` thành `true`. Nếu có WebM, thay `landscape.webm: undefined` bằng đường dẫn file; nếu không, giữ nguyên `undefined` để trình duyệt không yêu cầu file thiếu.
 4. Chạy `npm run typecheck`, sau đó `npm run build`.
 
 Website không yêu cầu bất kỳ file video nào khi mảng readiness rỗng và `logoVideoReady` là `false`.
@@ -69,6 +68,8 @@ npm run images
 ```
 
 Lệnh này sinh biến thể 480/960 cho ảnh sản phẩm và 600/1200 cho ảnh đội ngũ, không ghi đè ảnh nguồn.
+
+Giữ thuộc tính `width` và `height` trên mọi thẻ `<img>` để trình duyệt dành sẵn không gian và tránh nhảy bố cục. Mỗi rule CSS của ảnh phải đồng thời đặt `height: auto` khi ảnh co theo chiều rộng, hoặc đặt một chiều cao tường minh (chẳng hạn `height: 100%` hay chiều cao cố định) khi bố cục cần crop ảnh.
 
 ## 5. Checklist trước khi deploy
 

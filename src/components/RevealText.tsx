@@ -9,9 +9,10 @@ export function RevealText({ text, className = '' }: Props) {
       {text.split('\n').map((line, index) => (
         <span className="reveal-text__line" key={`${line}-${index}`}>
           <motion.span
-            initial={reduceMotion ? false : { y: '105%', opacity: 0 }}
-            whileInView={{ y: '0%', opacity: 1 }}
-            viewport={{ once: true, amount: 0.7 }}
+            variants={reduceMotion ? undefined : {
+              hidden: { y: '105%', opacity: 0 },
+              visible: { y: '0%', opacity: 1 },
+            }}
             transition={{ duration: 0.65, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
           >
             {line}
