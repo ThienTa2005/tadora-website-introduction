@@ -27,6 +27,7 @@ import { products, productCategories, type Product } from './data/products'
 import { navItems, site } from './data/site'
 import { team, type Member } from './data/team'
 import { timeline } from './data/timeline'
+import { imageVariant, responsiveImage } from './lib/images'
 
 const fadeUp = {
   hidden: { opacity: 0, y: 28 },
@@ -188,21 +189,30 @@ function App() {
               transition={{ duration: 0.85, delay: 0.2 }}
               style={{ x: heroX, y: heroY }}
             >
-              <img src="/assets/products/60.webp" alt="Quạt tích điện Magic A028" width="960" height="960" loading="eager" fetchPriority="high" />
-              <HeroProductVideo product={heroProduct} poster="/assets/products/60.webp" />
+              <img
+                src={responsiveImage('/assets/products/60.webp', 'product').src}
+                srcSet={responsiveImage('/assets/products/60.webp', 'product').srcSet}
+                sizes="(min-width: 1281px) 500px, (min-width: 1051px) 410px, (min-width: 721px) 500px, 272px"
+                alt="Quạt tích điện Magic A028"
+                width="960"
+                height="960"
+                loading="eager"
+                fetchPriority="high"
+              />
+              <HeroProductVideo product={heroProduct} poster={imageVariant('/assets/products/60.webp', 960)} />
               <figcaption><span>Sản phẩm nổi bật</span><strong>Magic A028</strong></figcaption>
             </motion.figure>
             <motion.figure
               className="hero-card hero-card-left"
               style={{ x: heroLeftX, y: heroLeftY }}
             >
-              <img src="/assets/products/01.webp" alt="Bình giữ nhiệt Magic MPI-480" width="480" height="480" loading="lazy" decoding="async" />
+              <img src={imageVariant('/assets/products/01.webp', 480)} srcSet={responsiveImage('/assets/products/01.webp', 'product').srcSet} sizes="210px" alt="Bình giữ nhiệt Magic MPI-480" width="480" height="480" loading="lazy" decoding="async" />
             </motion.figure>
             <motion.figure
               className="hero-card hero-card-right"
               style={{ x: heroRightX, y: heroRightY }}
             >
-              <img src="/assets/products/80.webp" alt="Bàn chải điện Magic B26" width="480" height="480" loading="lazy" decoding="async" />
+              <img src={imageVariant('/assets/products/80.webp', 480)} srcSet={responsiveImage('/assets/products/80.webp', 'product').srcSet} sizes="220px" alt="Bàn chải điện Magic B26" width="480" height="480" loading="lazy" decoding="async" />
             </motion.figure>
             <div className="hero-seal"><Leaf /><span>Curated<br />for daily life</span></div>
           </div>
@@ -280,7 +290,7 @@ function App() {
                   exit={{ opacity: 0, scale: 0.96 }}
                   transition={{ duration: 0.35 }}
                 >
-                  <ProductCardMedia product={product} />
+                  <ProductCardMedia product={product} featured={index === 0} />
                   <div className="product-copy">
                     <small>{product.category}</small>
                     <h3>{product.name.replace('Magic ', '')}</h3>
@@ -336,8 +346,12 @@ function App() {
                 transition={{ delay: index * 0.06 }}
               >
                 <img
-                  src={member.image}
+                  src={responsiveImage(member.image, 'team').src}
+                  srcSet={responsiveImage(member.image, 'team').srcSet}
+                  sizes="(min-width: 721px) 58vw, calc(100vw - 28px)"
                   alt={'Chân dung ' + member.name}
+                  width={member.imageWidth}
+                  height={member.imageHeight}
                   loading="lazy"
                   style={{ objectPosition: member.imagePosition }}
                 />
@@ -389,7 +403,11 @@ function App() {
             <span className="closing-orbit closing-orbit-two" />
             <motion.img
               className="closing-product closing-product-main"
-              src="/assets/products/50.webp"
+              src={responsiveImage('/assets/products/50.webp', 'product').src}
+              srcSet={responsiveImage('/assets/products/50.webp', 'product').srcSet}
+              sizes="(min-width: 721px) 360px, 225px"
+              width="960"
+              height="960"
               alt=""
               loading="lazy"
               animate={reduceMotion ? {} : { y: [0, -10, 0], rotate: [-5, -3, -5] }}
@@ -397,7 +415,11 @@ function App() {
             />
             <motion.img
               className="closing-product closing-product-top"
-              src="/assets/products/62.webp"
+              src={responsiveImage('/assets/products/62.webp', 'product').src}
+              srcSet={responsiveImage('/assets/products/62.webp', 'product').srcSet}
+              sizes="(min-width: 721px) 225px, 135px"
+              width="960"
+              height="960"
               alt=""
               loading="lazy"
               animate={reduceMotion ? {} : { y: [0, 8, 0], rotate: [7, 5, 7] }}
@@ -405,7 +427,11 @@ function App() {
             />
             <motion.img
               className="closing-product closing-product-bottom"
-              src="/assets/products/76.webp"
+              src={responsiveImage('/assets/products/76.webp', 'product').src}
+              srcSet={responsiveImage('/assets/products/76.webp', 'product').srcSet}
+              sizes="(min-width: 721px) 210px, 130px"
+              width="960"
+              height="960"
               alt=""
               loading="lazy"
               animate={reduceMotion ? {} : { y: [0, -7, 0], rotate: [4, 6, 4] }}
@@ -449,8 +475,12 @@ function App() {
         {selectedMember && (
           <div className="member-modal">
             <img
-              src={selectedMember.image}
+              src={responsiveImage(selectedMember.image, 'team').src}
+              srcSet={responsiveImage(selectedMember.image, 'team').srcSet}
+              sizes="(min-width: 721px) 420px, calc(100vw - 64px)"
               alt={'Chân dung ' + selectedMember.name}
+              width={selectedMember.imageWidth}
+              height={selectedMember.imageHeight}
               style={{ objectPosition: selectedMember.imagePosition }}
             />
             <div>
@@ -486,10 +516,12 @@ function App() {
                 {selectedProduct.gallery.map((image, index) => (
                   <img
                     key={image}
-                    src={image}
+                    src={imageVariant(image, 960)}
                     alt={selectedProduct.name + ' — hình ' + (index + 1)}
                     loading={index < 2 ? 'eager' : 'lazy'}
                     decoding="async"
+                    width="960"
+                    height="960"
                   />
                 ))}
               </div>

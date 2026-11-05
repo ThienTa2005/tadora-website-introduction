@@ -102,8 +102,8 @@ export function LogoIntro({ onDone }: Props) {
             className={`logo-intro__static ${showStaticLogo ? 'is-visible' : ''}`}
             src="/logo-tadora-black.png"
             alt="TADORA"
-            width="520"
-            height="260"
+            width="2061"
+            height="398"
           />
           {showSkip && !showStaticLogo && (
             <button type="button" className="logo-intro__skip" onClick={skip}>Bỏ qua</button>

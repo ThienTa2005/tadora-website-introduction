@@ -2,8 +2,9 @@ import { Play } from 'lucide-react'
 import { useReducedMotion } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
 import type { Product } from '../data/products'
+import { responsiveImage } from '../lib/images'
 
-type Props = { product: Product }
+type Props = { product: Product; featured?: boolean }
 type NavigatorWithConnection = Navigator & { connection?: { saveData?: boolean } }
 
 let activeCardVideo: HTMLVideoElement | null = null
@@ -32,12 +33,13 @@ const selectTouchCandidate = () => {
   })
 }
 
-export function ProductCardMedia({ product }: Props) {
+export function ProductCardMedia({ product, featured = false }: Props) {
   const rootRef = useRef<HTMLDivElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const reduceMotion = useReducedMotion()
   const [playing, setPlaying] = useState(false)
   const [failed, setFailed] = useState(false)
+  const image = responsiveImage(product.image, 'product')
 
   useEffect(() => {
     const root = rootRef.current
@@ -98,7 +100,16 @@ export function ProductCardMedia({ product }: Props) {
 
   return (
     <div ref={rootRef} className="product-image">
-      <img src={product.image} alt={product.name} loading="lazy" decoding="async" />
+      <img
+        src={image.src}
+        srcSet={image.srcSet}
+        sizes={featured ? '(min-width: 1051px) 48vw, (min-width: 721px) 50vw, calc(100vw - 28px)' : '(min-width: 1051px) 24vw, (min-width: 721px) 50vw, calc(100vw - 28px)'}
+        alt={product.name}
+        width="960"
+        height="960"
+        loading="lazy"
+        decoding="async"
+      />
       {product.video && !failed && (
         <>
           <video
