@@ -7,7 +7,6 @@ import {
   ExternalLink,
   Leaf,
   Menu,
-  MousePointer2,
   School,
   Sparkles,
   Target,
@@ -19,6 +18,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { LogoLockup } from './components/LogoLockup'
 import { LogoIntro } from './components/LogoIntro'
 import { Modal } from './components/Modal'
+import { ProductCardMedia } from './components/ProductCardMedia'
 import { SectionHeading } from './components/SectionHeading'
 import { products, productCategories, type Product } from './data/products'
 import { navItems, site } from './data/site'
@@ -250,11 +250,7 @@ function App() {
                   exit={{ opacity: 0, scale: 0.96 }}
                   transition={{ duration: 0.35 }}
                 >
-                  <div className="product-image">
-                    <img src={product.image} alt={product.name} loading="lazy" />
-                    <span className="product-code">{product.code}</span>
-                    <span className="product-view"><MousePointer2 size={15} /> Xem chi tiết</span>
-                  </div>
+                  <ProductCardMedia product={product} />
                   <div className="product-copy">
                     <small>{product.category}</small>
                     <h3>{product.name.replace('Magic ', '')}</h3>
