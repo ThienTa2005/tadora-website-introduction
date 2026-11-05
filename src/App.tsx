@@ -17,6 +17,7 @@ import {
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { LogoLockup } from './components/LogoLockup'
+import { LogoIntro } from './components/LogoIntro'
 import { Modal } from './components/Modal'
 import { SectionHeading } from './components/SectionHeading'
 import { products, productCategories, type Product } from './data/products'
@@ -36,6 +37,7 @@ function App() {
   const [selectedMember, setSelectedMember] = useState<Member | null>(null)
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [category, setCategory] = useState('Tất cả')
+  const [introDone, setIntroDone] = useState(!site.logoVideoReady)
 
   const filteredProducts = useMemo(
     () => category === 'Tất cả' ? products : products.filter((product) => product.category === category),
@@ -65,6 +67,7 @@ function App() {
 
   return (
     <main>
+      <LogoIntro onDone={() => setIntroDone(true)} />
       <header className="nav-wrap">
         <a className="brand" href="#top" aria-label="TADORA — Trang chủ">
           <LogoLockup />
@@ -115,7 +118,7 @@ function App() {
           <motion.div
             className="hero-copy"
             initial="hidden"
-            animate="visible"
+            animate={introDone ? 'visible' : 'hidden'}
             variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
           >
             <motion.div className="hero-kicker" variants={fadeUp}>
@@ -151,7 +154,7 @@ function App() {
             <motion.figure
               className="hero-card hero-card-main"
               initial={{ opacity: 0, scale: 0.94, rotate: 1 }}
-              animate={{ opacity: 1, scale: 1, rotate: -2 }}
+              animate={introDone ? { opacity: 1, scale: 1, rotate: -2 } : { opacity: 0, scale: 0.94, rotate: 1 }}
               transition={{ duration: 0.85, delay: 0.2 }}
             >
               <img src="/assets/products/60.webp" alt="Quạt tích điện Magic A028" />
