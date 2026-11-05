@@ -1,3 +1,5 @@
+import { readyProductVideos } from './videos'
+
 export type Product = {
   name: string
   code: string
@@ -5,11 +7,26 @@ export type Product = {
   image: string
   gallery: string[]
   description: string
+  video?: {
+    src: string
+    poster: string
+    preview?: string
+  }
 }
 
 const asset = (number: number) => `/assets/products/${String(number).padStart(2, '0')}.webp`
+const slugFromCode = (code: string) => code.toLowerCase()
+const productVideo = (code: string): Product['video'] => {
+  const slug = slugFromCode(code)
+  if (!readyProductVideos.includes(slug)) return undefined
 
-export const products: Product[] = [
+  return {
+    src: `/videos/products/${slug}.mp4`,
+    poster: `/videos/products/${slug}-poster.webp`,
+  }
+}
+
+const productData: Product[] = [
   { name: 'Bình giữ nhiệt Magic MPI-480', code: 'MPI-480', category: 'Bình giữ nhiệt', image: asset(1), gallery: [1, 2, 3, 4, 5, 6, 7, 8].map(asset), description: 'Thiết kế gọn trong tay, tiện cho nhịp sống mỗi ngày.' },
   { name: 'Bình giữ nhiệt Magic MC1200', code: 'MC1200', category: 'Bình giữ nhiệt', image: asset(9), gallery: [9, 10, 11, 12, 13, 14, 15, 16].map(asset), description: 'Dung tích lớn, dễ cầm mang theo trong nhiều hành trình.' },
   { name: 'Bình giữ nhiệt Magic MC870', code: 'MC870', category: 'Bình giữ nhiệt', image: asset(19), gallery: [19, 20, 21, 22, 23, 24, 25].map(asset), description: 'Phối màu trẻ trung và nắp bật tiện lợi.' },
@@ -21,5 +38,10 @@ export const products: Product[] = [
   { name: 'Tăm nước Magic B02 Pro', code: 'B-02PRO', category: 'Chăm sóc cá nhân', image: asset(71), gallery: [71, 72, 73, 74, 75, 76, 77].map(asset), description: 'Thiết kế nhỏ gọn cho thói quen chăm sóc răng miệng.' },
   { name: 'Bàn chải điện Magic B26', code: 'B-26', category: 'Chăm sóc cá nhân', image: asset(78), gallery: [78, 79, 80, 81, 82, 83, 84, 85, 86, 87].map(asset), description: 'Thiết kế tối giản với nhiều màu sắc trẻ trung.' },
 ]
+
+export const products = productData.map((product) => ({
+  ...product,
+  video: productVideo(product.code),
+}))
 
 export const productCategories = ['Tất cả', 'Bình giữ nhiệt', 'Quạt sạc', 'Chăm sóc cá nhân']
