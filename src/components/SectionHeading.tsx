@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import { RevealText } from './RevealText'
 
 type Props = { eyebrow: string; title: string; description?: string; light?: boolean }
 
@@ -12,7 +13,7 @@ export function SectionHeading({ eyebrow, title, description, light = false }: P
       transition={{ duration: 0.65 }}
     >
       <span className="eyebrow">{eyebrow}</span>
-      <h2>{title}</h2>
+      <h2><RevealText text={title} /></h2>
       {description && <p>{description}</p>}
     </motion.div>
   )

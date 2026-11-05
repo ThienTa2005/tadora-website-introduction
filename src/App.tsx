@@ -1,4 +1,4 @@
-import { AnimatePresence, motion, useMotionValue, useReducedMotion, useSpring, useTransform } from 'framer-motion'
+import { AnimatePresence, motion, useMotionValue, useReducedMotion, useScroll, useSpring, useTransform } from 'framer-motion'
 import {
   ArrowDown,
   ArrowRight,
@@ -14,7 +14,7 @@ import {
   X,
   Zap,
 } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { LogoLockup } from './components/LogoLockup'
 import { LogoIntro } from './components/LogoIntro'
 import { HeroProductVideo } from './components/HeroProductVideo'
@@ -49,6 +49,10 @@ function App() {
   const heroLeftY = useTransform(heroY, (value) => value * 0.65)
   const heroRightX = useTransform(heroX, (value) => value * 0.78)
   const heroRightY = useTransform(heroY, (value) => value * -0.78)
+  const timelineRef = useRef<HTMLDivElement>(null)
+  const { scrollYProgress } = useScroll()
+  const scrollProgress = useSpring(scrollYProgress, { stiffness: 120, damping: 28, restDelta: 0.001 })
+  const { scrollYProgress: timelineScroll } = useScroll({ target: timelineRef, offset: ['start 80%', 'end 45%'] })
 
   const filteredProducts = useMemo(
     () => category === 'Tất cả' ? products : products.filter((product) => product.category === category),
@@ -92,6 +96,7 @@ function App() {
 
   return (
     <main>
+      <motion.div className="scroll-progress" style={{ scaleX: scrollProgress }} aria-hidden="true" />
       <LogoIntro onDone={() => setIntroDone(true)} />
       <header className="nav-wrap">
         <a className="brand" href="#top" aria-label="TADORA — Trang chủ">
@@ -359,7 +364,8 @@ function App() {
             </div>
             <p>Từ khởi động đến đo lường, mỗi cột mốc là một lần đội thử, học và tiến gần hơn đến cách làm kinh doanh số chuyên nghiệp.</p>
           </div>
-          <div className="timeline">
+          <div className="timeline" ref={timelineRef}>
+            <motion.span className="timeline-progress" style={{ scaleY: timelineScroll }} aria-hidden="true" />
             {timeline.map((item, index) => (
               <motion.article
                 key={item.label}
