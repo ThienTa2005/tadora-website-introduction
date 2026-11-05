@@ -169,7 +169,10 @@ try {
     const productVideoRequests = new Set()
     const consoleErrors = []
     page.on('response', (response) => { if (response.status() === 404) notFound.add(response.url()) })
-    page.on('request', (request) => { if (new URL(request.url()).pathname.startsWith('/videos/products/')) productVideoRequests.add(request.url()) })
+    page.on('request', (request) => {
+      const pathname = new URL(request.url()).pathname
+      if (pathname.startsWith('/videos/products/') && pathname.endsWith('.mp4')) productVideoRequests.add(request.url())
+    })
     page.on('console', (message) => { if (message.type() === 'error') consoleErrors.push(message.text()) })
 
     await page.goto(BASE_URL, { waitUntil: 'networkidle' })
@@ -178,6 +181,7 @@ try {
     await page.waitForFunction(() => getComputedStyle(document.querySelector('.nav-wrap')).position === 'fixed')
     await page.locator('.hero').screenshot({ path: join(SCREENSHOTS_DIR, `${viewportName}-hero.png`) })
     await page.locator('.nav-wrap').screenshot({ path: join(SCREENSHOTS_DIR, `${viewportName}-nav.png`) })
+    const eagerProductVideoRequests = [...productVideoRequests]
 
     if (viewport.width <= 720) {
       await page.evaluate(() => window.scrollTo(0, 320))
@@ -193,6 +197,13 @@ try {
     const intro = page.locator('.intro-section')
     await intro.scrollIntoViewIfNeeded()
     await intro.screenshot({ path: join(SCREENSHOTS_DIR, `${viewportName}-intro.png`) })
+
+    const showreel = page.locator('#showreel')
+    if (await showreel.count()) {
+      await page.evaluate(() => document.getElementById('showreel')?.scrollIntoView())
+      await showreel.screenshot({ path: join(SCREENSHOTS_DIR, `${viewportName}-showreel.png`) })
+      await page.screenshot({ path: join(SCREENSHOTS_DIR, `${viewportName}-showreel-viewport.png`) })
+    }
 
     const story = page.locator('.story-band')
     await story.scrollIntoViewIfNeeded()
@@ -223,13 +234,15 @@ try {
     await aboutUs.screenshot({ path: join(SCREENSHOTS_DIR, `${viewportName}-footer.png`) })
 
     const navSpyFailures = []
-    for (const [id, label] of [
+    const navTargets = [
       ['about', 'Giới thiệu'],
       ['products', 'Sản phẩm'],
       ['team', 'Đội ngũ'],
       ['journey', 'Hành trình'],
       ['about-us', 'Về chúng tôi'],
-    ]) {
+    ]
+    if (await page.locator('#showreel').count()) navTargets.splice(2, 0, ['showreel', 'Video'])
+    for (const [id, label] of navTargets) {
       await page.locator(`#${id}`).scrollIntoViewIfNeeded()
       try {
         await page.waitForFunction((expectedLabel) => (
@@ -244,6 +257,7 @@ try {
     const modal = page.locator('.modal')
     await modal.waitFor({ state: 'visible' })
     await waitForImages(page, '.product-gallery img')
+    await modal.evaluate((node) => { node.scrollTop = 0 })
     await modal.screenshot({ path: join(SCREENSHOTS_DIR, `${viewportName}-modal.png`) })
 
     const before = await measureLegacyLayout(page)
@@ -269,17 +283,21 @@ try {
       }
     })
     const activeAnimations = await page.evaluate(() => document.getAnimations().filter((animation) => animation.playState === 'running' && (animation.effect?.getTiming().duration ?? 0) > 1).length)
-    const dormantVideoState = {
+    const productVideoState = {
       showreelCount: await page.locator('#showreel').count(),
+      showreelCards: await page.locator('.showreel-card').count(),
+      productVideoCards: await page.locator('.product-video-badge').count(),
       fullScreenLogoCount: await page.locator('.logo-intro').count(),
       navLogoCount: await page.locator('.nav-logo-motion').count(),
       reducedMotionNavVideoCount: await page.locator('.nav-logo-motion__video').count(),
+      eagerProductVideoRequests,
       productVideoRequests: [...productVideoRequests],
+      unexpectedProductVideoRequests: [...productVideoRequests].filter((url) => !['/videos/products/a-014.mp4', '/videos/products/mpi-480.mp4'].includes(new URL(url).pathname)),
     }
     const afterFailures = after.filter((entry) => !entry.squarePass || !entry.naturalPass || entry.boxSizing !== 'border-box')
-    const result = { viewport: viewportName, overflow, notFound: [...notFound], consoleErrors, activeAnimations, dormantVideoState, navSpyFailures, afterFailures }
+    const result = { viewport: viewportName, overflow, notFound: [...notFound], consoleErrors, activeAnimations, productVideoState, navSpyFailures, afterFailures }
     viewportResults.push(result)
-    if (afterFailures.length || navSpyFailures.length || overflow.hasHorizontalScrollbar || notFound.size || consoleErrors.length || activeAnimations || dormantVideoState.showreelCount || dormantVideoState.fullScreenLogoCount || dormantVideoState.navLogoCount !== 1 || dormantVideoState.reducedMotionNavVideoCount || dormantVideoState.productVideoRequests.length) exitCode = 1
+    if (afterFailures.length || navSpyFailures.length || overflow.hasHorizontalScrollbar || notFound.size || consoleErrors.length || activeAnimations || productVideoState.showreelCount !== 1 || productVideoState.showreelCards !== 2 || productVideoState.productVideoCards !== 2 || productVideoState.fullScreenLogoCount || productVideoState.navLogoCount !== 1 || productVideoState.reducedMotionNavVideoCount || productVideoState.eagerProductVideoRequests.length || productVideoState.unexpectedProductVideoRequests.length) exitCode = 1
     await context.close()
   }
 
@@ -309,6 +327,7 @@ try {
   await playbackPage.waitForFunction(() => !document.querySelector('.nav-logo-motion__video') && document.querySelector('.nav-logo-motion__static.is-visible'), undefined, { timeout: 10_000 })
   playbackResult.settledToStatic = true
   playbackResult.revealedHeadings = 0
+  const productPlaybackResult = { desktop: [], mobile: [], desktopShowreelPlaying: false, mobileShowreelPlaying: false }
   for (const selector of ['.products-section .section-heading', '.team-section .section-heading']) {
     await playbackPage.locator(selector).scrollIntoViewIfNeeded()
     await playbackPage.waitForFunction((headingSelector) => {
@@ -317,6 +336,35 @@ try {
     }, selector, { timeout: 5_000 })
     playbackResult.revealedHeadings += 1
   }
+  for (const code of ['MPI-480', 'A-014']) {
+    const card = playbackPage.locator('.product-card').filter({ hasText: code })
+    await card.scrollIntoViewIfNeeded()
+    await card.hover()
+    const video = card.locator('.product-card-video')
+    await video.evaluate((node, productCode) => new Promise((resolve, reject) => {
+      const timeout = window.setTimeout(() => reject(new Error(`Desktop card video did not play: ${productCode}`)), 10_000)
+      const ready = () => {
+        if (!node.paused && node.currentTime > 0.35) {
+          window.clearTimeout(timeout)
+          resolve()
+        } else window.requestAnimationFrame(ready)
+      }
+      ready()
+    }), code)
+    productPlaybackResult.desktop.push(await video.evaluate((node, productCode) => ({
+      code: productCode,
+      width: node.videoWidth,
+      height: node.videoHeight,
+      duration: Number(node.duration.toFixed(2)),
+      muted: node.muted,
+      loop: node.loop,
+      playing: !node.paused,
+    }), code))
+    if (code === 'MPI-480') await card.screenshot({ path: join(SCREENSHOTS_DIR, '1440x900-product-video-playing.png') })
+  }
+  await playbackPage.locator('#showreel').scrollIntoViewIfNeeded()
+  await playbackPage.waitForFunction(() => [...document.querySelectorAll('.showreel-card video')].some((video) => !video.paused && video.currentTime > 0.05), undefined, { timeout: 10_000 })
+  productPlaybackResult.desktopShowreelPlaying = true
   await playbackPage.reload({ waitUntil: 'domcontentloaded' })
   await playbackPage.waitForFunction(() => {
     const video = document.querySelector('.nav-logo-motion__video')
@@ -326,24 +374,54 @@ try {
   if (!playbackResult.playedInNav || !playbackResult.settledToStatic || playbackResult.revealedHeadings !== 2 || !playbackResult.replayedAfterReload || !playbackResult.muted || playbackResult.loop) exitCode = 1
   await playbackContext.close()
 
+  const mobilePlaybackContext = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, reducedMotion: 'no-preference' })
+  const mobilePlaybackPage = await mobilePlaybackContext.newPage()
+  await mobilePlaybackPage.goto(BASE_URL, { waitUntil: 'networkidle' })
+  for (const code of ['MPI-480', 'A-014']) {
+    const card = mobilePlaybackPage.locator('.product-card').filter({ hasText: code })
+    await card.scrollIntoViewIfNeeded()
+    const video = card.locator('.product-card-video')
+    await video.evaluate((node, productCode) => new Promise((resolve, reject) => {
+      const timeout = window.setTimeout(() => reject(new Error(`Mobile card video did not play: ${productCode}`)), 10_000)
+      const ready = () => {
+        if (!node.paused && node.currentTime > 0.35) {
+          window.clearTimeout(timeout)
+          resolve()
+        } else window.requestAnimationFrame(ready)
+      }
+      ready()
+    }), code)
+    productPlaybackResult.mobile.push(await video.evaluate((node, productCode) => ({ code: productCode, playing: !node.paused, muted: node.muted }), code))
+    if (code === 'MPI-480') await card.screenshot({ path: join(SCREENSHOTS_DIR, '390x844-product-video-playing.png') })
+  }
+  await mobilePlaybackPage.locator('#showreel').scrollIntoViewIfNeeded()
+  await mobilePlaybackPage.waitForFunction(() => [...document.querySelectorAll('.showreel-card video')].some((video) => !video.paused && video.currentTime > 0.05), undefined, { timeout: 10_000 })
+  productPlaybackResult.mobileShowreelPlaying = true
+  if (productPlaybackResult.desktop.length !== 2 || productPlaybackResult.mobile.length !== 2 || !productPlaybackResult.desktopShowreelPlaying || !productPlaybackResult.mobileShowreelPlaying || [...productPlaybackResult.desktop, ...productPlaybackResult.mobile].some((video) => !video.playing || !video.muted)) exitCode = 1
+  await mobilePlaybackContext.close()
+
   const summary = summarize(allMeasurements)
   console.table(summary)
-  console.table(viewportResults.map(({ viewport, overflow, notFound, consoleErrors, activeAnimations, dormantVideoState, navSpyFailures, afterFailures }) => ({
+  console.table(viewportResults.map(({ viewport, overflow, notFound, consoleErrors, activeAnimations, productVideoState, navSpyFailures, afterFailures }) => ({
     viewport,
     horizontalScrollbar: overflow.hasHorizontalScrollbar,
     rawWidth: `${overflow.scrollWidth}/${overflow.clientWidth}`,
     request404: notFound.length,
     consoleErrors: consoleErrors.length,
-    dormantProductVideoRequests: dormantVideoState.productVideoRequests.length,
-    forbiddenVideoSections: dormantVideoState.showreelCount + dormantVideoState.fullScreenLogoCount,
-    navLogoSlots: dormantVideoState.navLogoCount,
-    reducedMotionNavVideos: dormantVideoState.reducedMotionNavVideoCount,
+    eagerProductVideoRequests: productVideoState.eagerProductVideoRequests.length,
+    productVideoRequests: productVideoState.productVideoRequests.length,
+    unexpectedVideoRequests: productVideoState.unexpectedProductVideoRequests.length,
+    showreelCards: productVideoState.showreelCards,
+    productVideoCards: productVideoState.productVideoCards,
+    navLogoSlots: productVideoState.navLogoCount,
+    reducedMotionNavVideos: productVideoState.reducedMotionNavVideoCount,
     navSpyFailures: navSpyFailures.length,
     activeAnimations,
     ratioFailures: afterFailures.length,
   })))
   console.table([playbackResult])
-  await writeFile(join(SCREENSHOTS_DIR, 'image-layout-report.json'), JSON.stringify({ summary, viewportResults, playbackResult, measurements: allMeasurements }, null, 2))
+  console.table([...productPlaybackResult.desktop, ...productPlaybackResult.mobile])
+  await writeFile(join(SCREENSHOTS_DIR, 'image-layout-report.json'), JSON.stringify({ summary, viewportResults, playbackResult, productPlaybackResult, measurements: allMeasurements }, null, 2))
   console.log(`Screenshots and report: ${SCREENSHOTS_DIR}`)
 } catch (error) {
   exitCode = 1

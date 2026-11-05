@@ -40,7 +40,7 @@ export function Showreel({ products, onSelect }: Props) {
         <div className="showreel-heading-row">
           <SectionHeading
             light
-            eyebrow="03 · SHOWREEL"
+            eyebrow="VIDEO · SẢN PHẨM"
             title="Xem MAGIC chuyển động."
             description="Chạm, vuốt hoặc dùng phím để khám phá từng sản phẩm trong nhịp chuyển động của TADORA."
           />
