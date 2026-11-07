@@ -21,7 +21,6 @@ import { ChannelLinks } from './components/ChannelLinks'
 import { Modal } from './components/Modal'
 import { ProductCardMedia } from './components/ProductCardMedia'
 import { SectionHeading } from './components/SectionHeading'
-import { Showreel } from './components/Showreel'
 import { VideoPlayer } from './components/VideoPlayer'
 import { products, productCategories, type Product } from './data/products'
 import { navItems, site } from './data/site'
@@ -68,8 +67,7 @@ function App() {
     () => category === 'Tất cả' ? products : products.filter((product) => product.category === category),
     [category],
   )
-  const videoProducts = useMemo(() => products.filter((product) => product.video), [])
-  const heroProduct = useMemo(() => products.find((product) => product.code === 'A-028'), [])
+  const heroProduct = useMemo(() => products.find((product) => product.code === 'B-26'), [])
 
   const moveHero = (event: React.PointerEvent<HTMLDivElement>) => {
     if (reduceMotion || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return
@@ -216,36 +214,42 @@ function App() {
             />
             <motion.figure
               className="hero-card hero-card-main"
-              initial={{ opacity: 0, scale: 0.94, rotate: 1 }}
-              animate={{ opacity: 1, scale: 1, rotate: -2 }}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.85, delay: 0.2 }}
               style={{ x: heroX, y: heroY }}
             >
-              <img
-                src={responsiveImage('/assets/products/60.webp', 'product').src}
-                srcSet={responsiveImage('/assets/products/60.webp', 'product').srcSet}
-                sizes="(min-width: 1281px) 500px, (min-width: 1051px) 410px, (min-width: 721px) 500px, 272px"
-                alt="Quạt tích điện Magic A028"
-                width="960"
-                height="960"
-                loading="eager"
-              />
-              <HeroProductVideo product={heroProduct} poster={imageVariant('/assets/products/60.webp', 960)} />
-              <figcaption><span>Sản phẩm nổi bật</span><strong>Magic A028</strong></figcaption>
+              <div className="hero-phone-island" aria-hidden="true" />
+              <div className="hero-phone-screen">
+                <img
+                  className="hero-phone-poster"
+                  src={responsiveImage('/assets/products/78.webp', 'product').src}
+                  srcSet={responsiveImage('/assets/products/78.webp', 'product').srcSet}
+                  sizes="(min-width: 1281px) 340px, (min-width: 1051px) 310px, (min-width: 721px) 320px, 240px"
+                  alt="Bàn chải điện Magic B26"
+                  width="720"
+                  height="1280"
+                  loading="eager"
+                />
+                <HeroProductVideo product={heroProduct} poster={imageVariant('/assets/products/78.webp', 960)} />
+              </div>
             </motion.figure>
             <motion.figure
               className="hero-card hero-card-left"
               style={{ x: heroLeftX, y: heroLeftY }}
             >
-              <img className="lazy-image" src={imageVariant('/assets/products/01.webp', 480)} srcSet={responsiveImage('/assets/products/01.webp', 'product').srcSet} sizes="210px" alt="Bình giữ nhiệt Magic MPI-480" width="480" height="480" loading="lazy" decoding="async" onLoad={markLazyImageLoaded} />
+              <img src={imageVariant('/assets/products/01.webp', 480)} srcSet={responsiveImage('/assets/products/01.webp', 'product').srcSet} sizes="210px" alt="Bình giữ nhiệt Magic MPI-480" width="480" height="480" loading="eager" />
             </motion.figure>
             <motion.figure
               className="hero-card hero-card-right"
               style={{ x: heroRightX, y: heroRightY }}
             >
-              <img className="lazy-image" src={imageVariant('/assets/products/80.webp', 480)} srcSet={responsiveImage('/assets/products/80.webp', 'product').srcSet} sizes="220px" alt="Bàn chải điện Magic B26" width="480" height="480" loading="lazy" decoding="async" onLoad={markLazyImageLoaded} />
+              <img src={imageVariant('/assets/products/80.webp', 480)} srcSet={responsiveImage('/assets/products/80.webp', 'product').srcSet} sizes="220px" alt="Bàn chải điện Magic B26" width="480" height="480" loading="eager" />
             </motion.figure>
-            <div className="hero-seal"><Leaf /><span>Curated<br />for daily life</span></div>
+            <motion.div className="hero-seal" style={{ x: heroLeftX, y: heroLeftY }}>
+              <Leaf />
+              <span>Curated<br />for daily life</span>
+            </motion.div>
           </div>
         </div>
         <div className="hero-marquee" aria-hidden="true">
@@ -358,8 +362,6 @@ function App() {
           </motion.div>
         </div>
       </section>
-
-      <Showreel products={videoProducts} onSelect={setSelectedProduct} />
 
       <section className="story-band">
         <span className="story-orb story-orb-one" aria-hidden="true" />

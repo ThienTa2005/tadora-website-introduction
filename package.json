@@ -13,6 +13,7 @@
     "typecheck": "tsc -b",
     "check": "npm run build",
     "images": "node scripts/optimize-images.mjs",
+    "videos": "node scripts/optimize-videos.mjs",
     "test:image-layout": "node scripts/verify-image-layout.mjs"
   },
   "dependencies": {

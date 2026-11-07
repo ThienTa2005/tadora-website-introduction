@@ -1,5 +1,3 @@
-import { readyProductVideos } from "./videos";
-
 export const site = {
   name: "TADORA",
   domain: "tadora.id.vn",
@@ -27,7 +25,6 @@ export const site = {
 export const navItems = [
   { id: "about", label: "Giới thiệu" },
   { id: "products", label: "Sản phẩm" },
-  ...(readyProductVideos.length ? [{ id: "showreel", label: "Video" }] : []),
   { id: "team", label: "Đội ngũ" },
   { id: "journey", label: "Hành trình" },
   { id: "about-us", label: "Về chúng tôi" },

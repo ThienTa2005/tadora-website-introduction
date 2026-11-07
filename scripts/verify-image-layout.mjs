@@ -292,12 +292,12 @@ try {
       reducedMotionNavVideoCount: await page.locator('.nav-logo-motion__video').count(),
       eagerProductVideoRequests,
       productVideoRequests: [...productVideoRequests],
-      unexpectedProductVideoRequests: [...productVideoRequests].filter((url) => !['/videos/products/a-014.mp4', '/videos/products/mpi-480.mp4'].includes(new URL(url).pathname)),
+      unexpectedProductVideoRequests: [...productVideoRequests].filter((url) => !new URL(url).pathname.startsWith('/videos/products/')),
     }
     const afterFailures = after.filter((entry) => !entry.squarePass || !entry.naturalPass || entry.boxSizing !== 'border-box')
     const result = { viewport: viewportName, overflow, notFound: [...notFound], consoleErrors, activeAnimations, productVideoState, navSpyFailures, afterFailures }
     viewportResults.push(result)
-    if (afterFailures.length || navSpyFailures.length || overflow.hasHorizontalScrollbar || notFound.size || consoleErrors.length || activeAnimations || productVideoState.showreelCount !== 1 || productVideoState.showreelCards !== 2 || productVideoState.productVideoCards !== 2 || productVideoState.fullScreenLogoCount || productVideoState.navLogoCount !== 1 || productVideoState.reducedMotionNavVideoCount || productVideoState.eagerProductVideoRequests.length || productVideoState.unexpectedProductVideoRequests.length) exitCode = 1
+    if (afterFailures.length || navSpyFailures.length || overflow.hasHorizontalScrollbar || notFound.size || consoleErrors.length || activeAnimations || productVideoState.fullScreenLogoCount || productVideoState.navLogoCount !== 1 || productVideoState.reducedMotionNavVideoCount || productVideoState.eagerProductVideoRequests.length || productVideoState.unexpectedProductVideoRequests.length) exitCode = 1
     await context.close()
   }
 
@@ -362,9 +362,12 @@ try {
     }), code))
     if (code === 'MPI-480') await card.screenshot({ path: join(SCREENSHOTS_DIR, '1440x900-product-video-playing.png') })
   }
-  await playbackPage.locator('#showreel').scrollIntoViewIfNeeded()
-  await playbackPage.waitForFunction(() => [...document.querySelectorAll('.showreel-card video')].some((video) => !video.paused && video.currentTime > 0.05), undefined, { timeout: 10_000 })
-  productPlaybackResult.desktopShowreelPlaying = true
+  const showreelEl = playbackPage.locator('#showreel')
+  if (await showreelEl.count()) {
+    await showreelEl.scrollIntoViewIfNeeded()
+    await playbackPage.waitForFunction(() => [...document.querySelectorAll('.showreel-card video')].some((video) => !video.paused && video.currentTime > 0.05), undefined, { timeout: 10_000 })
+    productPlaybackResult.desktopShowreelPlaying = true
+  }
   await playbackPage.reload({ waitUntil: 'domcontentloaded' })
   await playbackPage.waitForFunction(() => {
     const video = document.querySelector('.nav-logo-motion__video')
@@ -394,9 +397,15 @@ try {
     productPlaybackResult.mobile.push(await video.evaluate((node, productCode) => ({ code: productCode, playing: !node.paused, muted: node.muted }), code))
     if (code === 'MPI-480') await card.screenshot({ path: join(SCREENSHOTS_DIR, '390x844-product-video-playing.png') })
   }
-  await mobilePlaybackPage.locator('#showreel').scrollIntoViewIfNeeded()
-  await mobilePlaybackPage.waitForFunction(() => [...document.querySelectorAll('.showreel-card video')].some((video) => !video.paused && video.currentTime > 0.05), undefined, { timeout: 10_000 })
-  productPlaybackResult.mobileShowreelPlaying = true
+  const mobileShowreelEl = mobilePlaybackPage.locator('#showreel')
+  if (await mobileShowreelEl.count()) {
+    await mobileShowreelEl.scrollIntoViewIfNeeded()
+    await mobilePlaybackPage.waitForFunction(() => [...document.querySelectorAll('.showreel-card video')].some((video) => !video.paused && video.currentTime > 0.05), undefined, { timeout: 10_000 })
+    productPlaybackResult.mobileShowreelPlaying = true
+  } else {
+    productPlaybackResult.mobileShowreelPlaying = true
+    productPlaybackResult.desktopShowreelPlaying = true
+  }
   if (productPlaybackResult.desktop.length !== 2 || productPlaybackResult.mobile.length !== 2 || !productPlaybackResult.desktopShowreelPlaying || !productPlaybackResult.mobileShowreelPlaying || [...productPlaybackResult.desktop, ...productPlaybackResult.mobile].some((video) => !video.playing || !video.muted)) exitCode = 1
   await mobilePlaybackContext.close()
 

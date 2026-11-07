@@ -1,4 +1,4 @@
-import { readyProductVideos } from './videos'
+import { productVideoSlugs } from './videos'
 
 export type Product = {
   name: string
@@ -15,14 +15,13 @@ export type Product = {
 }
 
 const asset = (number: number) => `/assets/products/${String(number).padStart(2, '0')}.webp`
-const slugFromCode = (code: string) => code.toLowerCase()
-const productVideo = (code: string): Product['video'] => {
-  const slug = slugFromCode(code)
-  if (!readyProductVideos.includes(slug)) return undefined
+const productVideo = (code: string, poster: string): Product['video'] => {
+  const slug = productVideoSlugs[code]
+  if (!slug) return undefined
 
   return {
     src: `/videos/products/${slug}.mp4`,
-    poster: `/videos/products/${slug}-poster.webp`,
+    poster,
   }
 }
 
@@ -41,7 +40,7 @@ const productData: Product[] = [
 
 export const products = productData.map((product) => ({
   ...product,
-  video: productVideo(product.code),
+  video: productVideo(product.code, product.image),
 }))
 
 export const productCategories = ['Tất cả', 'Bình giữ nhiệt', 'Quạt sạc', 'Chăm sóc cá nhân']

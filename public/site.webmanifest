@@ -10,10 +10,16 @@
   "theme_color": "#291811",
   "icons": [
     {
-      "src": "/logo-tadora-black.png",
-      "sizes": "2061x398",
+      "src": "/favicon-192x192.png",
+      "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/favicon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
