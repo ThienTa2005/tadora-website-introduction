@@ -1,6 +1,6 @@
 # TADORA — DBC 2026
 
-Website giới thiệu đội thi TADORA theo hướng **team portfolio + digital business project showcase + interactive storytelling**.
+Website giới thiệu thương hiệu TADORA của đội thi **Quá tam ba bận** theo hướng **team portfolio + digital business project showcase + interactive storytelling**.
 
 - Repository: <https://github.com/ThienTa2005/tadora-website-introduction>
 - Tên miền dự kiến: <https://tadora.id.vn>

@@ -12,6 +12,10 @@ import {
   ArrowRight,
   CalendarDays,
   ChevronRight,
+  Cloud,
+  ExternalLink,
+  FileText,
+  FolderOpen,
   Leaf,
   Menu,
   School,
@@ -204,9 +208,14 @@ function App() {
             </button>
           ))}
         </nav>
-        <button className="nav-cta" onClick={() => scrollTo("products")}>
-          Khám phá <ArrowRight size={16} />
-        </button>
+        <a
+          className="nav-cta"
+          href={site.proposalUrl}
+          target="_blank"
+          rel="noreferrer"
+        >
+          Xem đề án <ExternalLink size={16} />
+        </a>
         <button
           className="menu-button"
           onClick={() => setMenuOpen((open) => !open)}
@@ -266,9 +275,9 @@ function App() {
               {site.message}
             </motion.p>
             <motion.p className="hero-lead" variants={fadeUp}>
-              Hành trình kinh doanh số của sinh viên PTIT — nơi ý tưởng trẻ gặp
-              những sản phẩm tiện ích được kể bằng một ngôn ngữ gần gũi, tươi
-              mới.
+              Hành trình kinh doanh số của đội {site.teamName}, sinh viên PTIT
+              — nơi ý tưởng trẻ gặp những sản phẩm tiện ích được kể bằng một
+              ngôn ngữ gần gũi, tươi mới.
             </motion.p>
             <motion.div className="hero-actions" variants={fadeUp}>
               <button
@@ -409,7 +418,7 @@ function App() {
               </h2>
               <div className="intro-sticky-foot">
                 <Sparkles />
-                <span>PTIT · DBC 2026</span>
+                <span>{site.teamName} · PTIT</span>
               </div>
             </motion.div>
             <motion.div
@@ -425,8 +434,9 @@ function App() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
               >
-                TADORA là đội sinh viên Học viện Công nghệ Bưu chính Viễn thông
-                tham gia Cuộc thi Sinh viên Kinh doanh số 2026.
+                TADORA là thương hiệu kinh doanh số được xây dựng bởi đội “{site.teamName}” —
+                các sinh viên Học viện Công nghệ Bưu chính Viễn thông tham gia
+                Cuộc thi Sinh viên Kinh doanh số 2026.
               </motion.p>
               <p>
                 Chúng mình đưa kiến thức trên giảng đường vào trải nghiệm kinh
@@ -477,10 +487,140 @@ function App() {
         </div>
       </section>
 
+      <section className="section proposal-section" id="proposal">
+        <div className="container">
+          <motion.div
+            className="proposal-panel"
+            initial={reduceMotion ? false : { opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.25 }}
+            transition={{ duration: 0.65 }}
+          >
+            <span className="proposal-grid" aria-hidden="true" />
+            <motion.span
+              className="proposal-spotlight proposal-spotlight-one"
+              aria-hidden="true"
+              animate={reduceMotion ? {} : { x: [0, 32, 0], y: [0, -18, 0] }}
+              transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
+            />
+            <motion.span
+              className="proposal-spotlight proposal-spotlight-two"
+              aria-hidden="true"
+              animate={reduceMotion ? {} : { x: [0, -24, 0], y: [0, 20, 0] }}
+              transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+            />
+
+            <div className="proposal-copy">
+              <div className="proposal-topline">
+                <span className="eyebrow">02 · HỒ SƠ ĐỀ ÁN</span>
+                <span className="proposal-live">
+                  <i /> DRIVE LIVE
+                </span>
+              </div>
+              <h2>
+                Đề án TADORA.
+                <br />
+                <em>Chạm để khám phá.</em>
+              </h2>
+              <p>
+                Một điểm truy cập duy nhất cho toàn bộ hồ sơ và tài liệu của
+                đội {site.teamName} dành cho thương hiệu TADORA tại Cuộc thi
+                Sinh viên Kinh doanh số 2026.
+              </p>
+              <div className="proposal-tags" aria-label="Thông tin đề án">
+                <span><FolderOpen /> Hồ sơ tổng hợp</span>
+                <span><Cloud /> Cập nhật trên Drive</span>
+                <span><Sparkles /> DBC 2026</span>
+              </div>
+              <a
+                className="proposal-button"
+                href={site.proposalUrl}
+                target="_blank"
+                rel="noreferrer"
+              >
+                <span className="proposal-button-icon">
+                  <FolderOpen />
+                </span>
+                <span>
+                  <small>KHÁM PHÁ TRÊN GOOGLE DRIVE</small>
+                  <strong>Mở toàn bộ đề án</strong>
+                </span>
+                <span className="proposal-button-arrow">
+                  <ExternalLink />
+                </span>
+              </a>
+              <span className="proposal-note">
+                <i /> Mở trong tab mới · Nội dung được đồng bộ trên Drive
+              </span>
+            </div>
+
+            <div className="proposal-visual" aria-hidden="true">
+              <span className="proposal-orbit proposal-orbit-one" />
+              <span className="proposal-orbit proposal-orbit-two" />
+              <motion.div
+                className="proposal-float-card proposal-float-card-one"
+                animate={reduceMotion ? {} : { y: [0, -10, 0], rotate: [-4, -1, -4] }}
+                transition={{ duration: 4.8, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <span><FileText /></span>
+                <div><small>TÀI LIỆU</small><strong>Hồ sơ tổng hợp</strong></div>
+              </motion.div>
+              <motion.div
+                className="proposal-float-card proposal-float-card-two"
+                animate={reduceMotion ? {} : { y: [0, 9, 0], rotate: [4, 1, 4] }}
+                transition={{ duration: 5.6, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <span><Cloud /></span>
+                <div><small>TRẠNG THÁI</small><strong>Luôn sẵn sàng</strong></div>
+              </motion.div>
+
+              <motion.div
+                className="proposal-folder-wrap"
+                animate={reduceMotion ? {} : { y: [0, -12, 0], rotate: [-3, -.5, -3] }}
+                transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <div className="proposal-folder">
+                  <span className="proposal-folder-tab">QUÁ TAM BA BẬN · DBC 2026</span>
+                  <div className="proposal-folder-toolbar">
+                    <span /><span /><span />
+                    <small>drive.google.com</small>
+                  </div>
+                  <div className="proposal-folder-content">
+                    <span className="proposal-folder-cloud"><Cloud /></span>
+                    <small>PROJECT HUB</small>
+                    <strong>ĐỀ ÁN</strong>
+                    <span className="proposal-folder-sub">HỒ SƠ TỔNG HỢP</span>
+                    <span className="proposal-folder-line"><i /></span>
+                  </div>
+                </div>
+              </motion.div>
+
+              <motion.div
+                className="proposal-document proposal-document-back"
+                animate={reduceMotion ? {} : { y: [0, 8, 0], rotate: [9, 6, 9] }}
+                transition={{ duration: 6.2, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <span className="proposal-document-icon"><FileText /></span>
+                <small>DBC 2026</small>
+                <strong>TADORA</strong>
+                <span />
+                <span />
+                <span />
+              </motion.div>
+              <div className="proposal-badge">
+                <span className="proposal-badge-ring" />
+                <Sparkles />
+                <span>OPEN<br />PROJECT</span>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
       <section className="section products-section" id="products">
         <div className="container">
           <SectionHeading
-            eyebrow="02 · BỘ SƯU TẬP MAGIC"
+            eyebrow="03 · BỘ SƯU TẬP MAGIC"
             title="Nhỏ gọn trong nhà. Tiện lợi ngoài phố."
             description="Những sản phẩm tiện ích được chọn cho nhịp sống học tập, làm việc và di chuyển mỗi ngày."
           />
@@ -589,9 +729,9 @@ function App() {
       <section className="section team-section" id="team">
         <div className="container">
           <SectionHeading
-            eyebrow="03 · OUR PEOPLE"
-            title="Năm cá tính. Một nhịp chung."
-            description="TADORA được tạo nên bởi những góc nhìn khác nhau, cùng gặp nhau ở tinh thần học hỏi và dám biến ý tưởng thành hành động."
+            eyebrow="04 · QUÁ TAM BA BẬN"
+            title="Năm cá tính. Một đội không bỏ cuộc."
+            description="Quá tam ba bận là đội ngũ đứng sau TADORA — năm góc nhìn khác nhau cùng gặp nhau ở tinh thần học hỏi và dám biến ý tưởng thành hành động."
           />
           <div className="team-grid">
             {team.map((member, index) => (
@@ -638,7 +778,7 @@ function App() {
         <div className="container">
           <div className="journey-heading">
             <div>
-              <span className="eyebrow">04 · OUR JOURNEY</span>
+              <span className="eyebrow">05 · OUR JOURNEY</span>
               <h2>
                 Từng bước nhỏ.
                 <br />
@@ -806,9 +946,9 @@ function App() {
               <em>Dấu ấn thật.</em>
             </h2>
             <p>
-              Mỗi sản phẩm là một cơ hội để đội ngũ TADORA thử nghiệm, học hỏi
-              và biến kiến thức trên giảng đường thành trải nghiệm kinh doanh số
-              thực tế.
+              Mỗi sản phẩm là một cơ hội để đội {site.teamName} thử nghiệm, học
+              hỏi và phát triển TADORA từ kiến thức trên giảng đường thành trải
+              nghiệm kinh doanh số thực tế.
             </p>
             <div className="closing-actions">
               <button
@@ -838,12 +978,12 @@ function App() {
           <div className="footer-grid">
             <div className="footer-brand">
               <LogoLockup />
-              <p>Một hành trình kinh doanh số của sinh viên PTIT.</p>
+              <p>TADORA — thương hiệu kinh doanh số của đội {site.teamName}.</p>
               <strong>{site.message}</strong>
             </div>
             <div className="footer-info">
-              <span>VỀ CHÚNG TÔI</span>
-              <strong>Sinh viên PTIT · DBC 2026</strong>
+              <span>ĐỘI THI</span>
+              <strong>{site.teamName}</strong>
               <p>{site.subMessage}</p>
             </div>
             <div className="footer-info">
@@ -875,8 +1015,8 @@ function App() {
             <span>© 2026 TADORA</span>
             <button onClick={() => scrollTo("top")}>Trở về đầu trang</button>
             <p>
-              TADORA là đội dự thi độc lập, không phải website chính thức của
-              MAGIC hoặc Ban Tổ chức DBC.
+              TADORA là thương hiệu dự thi của đội {site.teamName}, không phải
+              website chính thức của MAGIC hoặc Ban Tổ chức DBC.
             </p>
           </div>
         </motion.div>
@@ -899,7 +1039,7 @@ function App() {
               style={{ objectPosition: selectedMember.imagePosition }}
             />
             <div>
-              <span className="eyebrow">THÀNH VIÊN TADORA</span>
+              <span className="eyebrow">THÀNH VIÊN · {site.teamName}</span>
               <h2>{selectedMember.name}</h2>
               <p>{selectedMember.role}</p>
               <dl>
