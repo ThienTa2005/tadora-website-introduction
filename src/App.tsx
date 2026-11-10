@@ -22,6 +22,7 @@ import {
   Zap,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Analytics } from "@vercel/analytics/react";
 import { LogoLockup } from "./components/LogoLockup";
 import { NavLogoMotion } from "./components/NavLogoMotion";
 import { HeroProductVideo } from "./components/HeroProductVideo";
@@ -973,6 +974,7 @@ function App() {
           </div>
         )}
       </Modal>
+      <Analytics />
     </main>
   );
 }
