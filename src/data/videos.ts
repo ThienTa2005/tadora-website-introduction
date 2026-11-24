@@ -1,13 +1,34 @@
-export const productVideoSlugs: Record<string, string> = {
-  'MPI-480': 'mpi-480',
-  MC1200: 'mc1200',
-  MC870: 'mc-870',
-  MC650: 'mc-650',
-  MC570: 'mc-570',
-  MC500: 'mc-500',
-  'A-014': 'a-014',
-  'A-028': 'a-028',
-  'B-02PRO': 'b-02',
-  'B-26': 'b-26',
+import { catalog, type CatalogProduct } from './products'
+
+export const videoCategories = ['Video viral', 'Review sản phẩm', 'Test sản phẩm', 'Lifestyle', 'Hướng dẫn sử dụng', 'So sánh sản phẩm', 'Giới thiệu sản phẩm'] as const
+
+type VideoBase = {
+  id: string
+  title: string
+  creatorId?: string
+  productCodes: string[]
+  category: typeof videoCategories[number]
+  thumbnail: string
+  publishedAt?: string
+  featured?: boolean
 }
+
+export type TikTokVideo = VideoBase & { tiktokUrl: string; src?: never }
+export type HubVideo = TikTokVideo | (VideoBase & { tiktokUrl?: never; src: string })
+
+// Add confirmed posts here. Keep the original public TikTok post URL.
+export const tiktokVideos: TikTokVideo[] = []
+
+const localClips = catalog.flatMap((product): HubVideo[] => product.video ? [{
+  id: `clip-${product.slug}`,
+  title: `Giới thiệu ${product.name}`,
+  productCodes: [product.code],
+  category: 'Giới thiệu sản phẩm',
+  thumbnail: product.video.poster,
+  src: product.video.src,
+}] : [])
+
+export const videos: HubVideo[] = [...tiktokVideos, ...localClips]
+
+export const videosFor = (product: CatalogProduct) => videos.filter((video) => video.productCodes.includes(product.code))
 

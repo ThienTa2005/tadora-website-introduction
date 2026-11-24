@@ -1,11 +1,13 @@
 {
   "compilerOptions": {
     "composite": true,
+    "target": "ES2022",
+    "strict": true,
     "skipLibCheck": true,
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "allowImportingTsExtensions": true,
     "noEmit": true
   },
-  "include": ["vite.config.ts"]
+  "include": ["vite.config.ts", "scripts/static-pages.ts", "src/data/**/*.ts", "src/lib/images.ts", "src/lib/routes.ts"]
 }

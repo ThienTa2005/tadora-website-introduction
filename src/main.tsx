@@ -5,8 +5,10 @@ import '@fontsource/be-vietnam-pro/400.css'
 import '@fontsource/be-vietnam-pro/600.css'
 import '@fontsource/be-vietnam-pro/700.css'
 import '@fontsource/be-vietnam-pro/800.css'
+import '@fontsource-variable/montserrat'
 import App from './App'
 import './styles/index.css'
+import './styles/hub.css'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

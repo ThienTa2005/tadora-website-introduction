@@ -14,8 +14,10 @@ Máy local nên dùng Node.js 22:
 node --version
 npm --version
 npm ci
+npm run lint
 npm run typecheck
 npm run build
+npm test
 ```
 
 Điều kiện đạt:
@@ -25,7 +27,7 @@ npm run build
 - Vite tạo thành công thư mục `dist/`.
 - Không commit `node_modules/`, `dist/`, `.vercel/` hoặc thông tin đăng nhập.
 
-Website hiện không cần biến môi trường.
+Website hoạt động với dữ liệu trong repo. Xem mục Analytics trong [README](../README.md#analytics) để cấu hình GA4 hoặc tính năng phân tích nâng cao theo môi trường Preview và Production.
 
 ## 2. Import repository trên Vercel
 
@@ -43,7 +45,7 @@ Website hiện không cần biến môi trường.
    | Build Command | `npm run build` |
    | Output Directory | `dist` |
    | Node.js Version | `22.x` |
-   | Environment Variables | để trống |
+   | Environment Variables | tùy cấu hình Analytics của môi trường |
 
 5. Chọn **Deploy**.
 
@@ -55,8 +57,9 @@ Sau lần deploy đầu tiên, Vercel cấp một URL dạng `*.vercel.app`. Hã
 
 - Trang chủ tải không có màn hình trắng hoặc lỗi 404.
 - Logo navigation, hero và footer không chèn lên nội dung.
-- Menu mobile mở/đóng và cuộn đúng section.
-- Bộ lọc sản phẩm, modal thành viên và lightbox hoạt động.
+- Menu mobile mở và đóng, liên kết dự án và các mốc cũ dẫn đúng nội dung.
+- Bộ lọc sản phẩm, gallery, Video Hub, quiz, bảng so sánh và modal thành viên hoạt động.
+- Các CTA chỉ xuất hiện với liên kết đã được nhóm xác nhận và còn hiệu lực. Kiểm tra URL gốc cùng tham số tracking, sau đó đối chiếu sự kiện `affiliate_click`.
 - Font tiếng Việt hiển thị đủ dấu.
 - Tab Console trong DevTools không có lỗi màu đỏ.
 - `robots.txt`, `sitemap.xml` và `site.webmanifest` truy cập được.
@@ -95,10 +98,10 @@ Có thể thêm `www.tadora.id.vn` trong Vercel, tạo CNAME theo giá trị Ver
 Quy trình khuyến nghị:
 
 ```bash
-git checkout -b update/noi-dung
+git switch affiliate-v2
 git add .
-git commit -m "Update TADORA content"
-git push -u origin update/noi-dung
+git commit -m "Build TADORA affiliate and project hubs"
+git push -u origin affiliate-v2
 ```
 
 Tạo Pull Request trên GitHub, kiểm tra preview của Vercel rồi merge vào `main`.
@@ -162,7 +165,7 @@ Output Directory phải là `dist`, không phải `build` hoặc `public`.
 
 - `https://tadora.id.vn` có HTTPS hợp lệ.
 - URL HTTP tự chuyển sang HTTPS.
-- Canonical URL và Open Graph trỏ tới `https://tadora.id.vn/`.
+- Canonical URL và Open Graph của từng trang trỏ tới đường dẫn tương ứng trên `https://tadora.id.vn`.
 - Navigation, modal, bộ lọc và responsive hoạt động.
 - Không có tài liệu nội bộ, token hoặc biến môi trường bị công khai.
 - GitHub và Vercel đều theo dõi production branch `main`.

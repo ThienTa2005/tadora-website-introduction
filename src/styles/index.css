@@ -72,12 +72,7 @@ section[id], footer[id] { scroll-margin-top: 120px; }
 .channel-link__copy small { margin-bottom: 4px; color: var(--muted); font-size: 8px; font-weight: 650; transition: color .25s; }
 .channel-link__copy strong { font-size: 11px; font-weight: 850; }
 .channel-link__arrow { width: 14px; margin-left: 2px; opacity: .45; transition: opacity .25s, transform .25s; }
-.channel-link--shop { padding-right: 13px; border-color: #ee4d2d; background: #ee4d2d; color: #fff; box-shadow: 0 14px 30px rgba(238,77,45,.2); }
-.channel-link--shop .channel-link__icon { background: transparent; color: #fff; }
-.shopee-mark { width: 25px !important; height: 25px; overflow: visible; }
-.channel-link--shop .channel-link__copy small { color: rgba(255,255,255,.58); }
 .channel-link:hover { z-index: 1; transform: translateY(-4px); border-color: rgba(223,111,79,.38); background: var(--paper-strong); box-shadow: 0 16px 34px rgba(74,42,24,.12); }
-.channel-link--shop:hover { border-color: #d94021; background: #d94021; color: #fff; }
 .channel-link:hover .channel-link__icon { transform: rotate(-7deg) scale(1.07); background: var(--coral); color: #fff; }
 .channel-link:hover .channel-link__arrow { opacity: 1; transform: translate(2px,-2px); }
 .channel-link:active { transform: translateY(-1px) scale(.97); }
@@ -599,8 +594,6 @@ footer { padding: clamp(70px, 7vw, 105px) 0 24px; background: var(--paper-strong
 .footer-socials > div > p { margin: 0; color: var(--muted); font-size: 11px; }
 .footer-channels { flex: 0 1 auto; }
 .footer-channels .channel-link { background: #fff; box-shadow: none; }
-.footer-channels .channel-link--shop { border-color: #ee4d2d; background: #ee4d2d; color: #fff; }
-.footer-channels .channel-link--shop .channel-link__icon { background: transparent; color: #fff; }
 .footer-bottom { position: relative; z-index: 1; margin-top: 18px; display: grid; grid-template-columns: auto auto 1fr; align-items: center; gap: 28px; color: #94857a; font-size: 10px; }
 .footer-bottom button { min-height: 36px; padding: 0; border: 0; border-bottom: 1px solid var(--line); background: transparent; color: var(--muted); font-size: 10px; font-weight: 750; cursor: pointer; }
 .footer-bottom p { margin: 0; text-align: right; }

@@ -175,18 +175,18 @@ try {
     })
     page.on('console', (message) => { if (message.type() === 'error') consoleErrors.push(message.text()) })
 
-    await page.goto(BASE_URL, { waitUntil: 'networkidle' })
+    await page.goto(`${BASE_URL}/about`, { waitUntil: 'networkidle' })
     await waitForImages(page, '.hero-card img')
     await page.evaluate(() => window.scrollTo(0, 0))
-    await page.waitForFunction(() => getComputedStyle(document.querySelector('.nav-wrap')).position === 'fixed')
+    await page.waitForFunction(() => getComputedStyle(document.querySelector('.hub-nav')).position === 'sticky')
     await page.locator('.hero').screenshot({ path: join(SCREENSHOTS_DIR, `${viewportName}-hero.png`) })
-    await page.locator('.nav-wrap').screenshot({ path: join(SCREENSHOTS_DIR, `${viewportName}-nav.png`) })
+    await page.locator('.hub-nav').screenshot({ path: join(SCREENSHOTS_DIR, `${viewportName}-nav.png`) })
     const eagerProductVideoRequests = [...productVideoRequests]
 
     if (viewport.width <= 720) {
       await page.evaluate(() => window.scrollTo(0, 320))
       await page.waitForFunction(() => {
-        const nav = document.querySelector('.nav-wrap')
+        const nav = document.querySelector('.hub-nav')
         if (!nav) return false
         const rect = nav.getBoundingClientRect()
         return rect.top >= 0 && rect.bottom <= window.innerHeight && Number(getComputedStyle(nav).opacity) > .99
@@ -239,14 +239,14 @@ try {
       ['products', 'Sản phẩm'],
       ['team', 'Đội ngũ'],
       ['journey', 'Hành trình'],
-      ['about-us', 'Về chúng tôi'],
+      ['about-us', 'Liên hệ'],
     ]
     if (await page.locator('#showreel').count()) navTargets.splice(2, 0, ['showreel', 'Video'])
     for (const [id, label] of navTargets) {
-      await page.locator(`#${id}`).scrollIntoViewIfNeeded()
+      await page.locator(`#${id}`).evaluate((element) => element.scrollIntoView({ block: 'start', behavior: 'instant' }))
       try {
         await page.waitForFunction((expectedLabel) => (
-          document.querySelector('.desktop-nav button.active')?.textContent?.trim() === expectedLabel
+          document.querySelector('.portfolio-nav a[aria-current="location"]')?.textContent?.trim() === expectedLabel
         ), label, { timeout: 2_000 })
       } catch {
         navSpyFailures.push(id)
@@ -303,7 +303,7 @@ try {
 
   const playbackContext = await browser.newContext({ viewport: { width: 1440, height: 900 }, reducedMotion: 'no-preference' })
   const playbackPage = await playbackContext.newPage()
-  await playbackPage.goto(BASE_URL, { waitUntil: 'domcontentloaded' })
+  await playbackPage.goto(`${BASE_URL}/about`, { waitUntil: 'domcontentloaded' })
   const playbackVideo = playbackPage.locator('.nav-logo-motion__video')
   await playbackVideo.waitFor({ state: 'visible' })
   await playbackPage.waitForFunction(() => {
@@ -314,7 +314,7 @@ try {
     const video = document.querySelector('.nav-logo-motion__video')
     return video instanceof HTMLVideoElement && video.currentTime >= 2
   }, undefined, { timeout: 10_000 })
-  await playbackPage.locator('.nav-wrap').screenshot({ path: join(SCREENSHOTS_DIR, '1440x900-nav-playing.png') })
+  await playbackPage.locator('.hub-nav').screenshot({ path: join(SCREENSHOTS_DIR, '1440x900-nav-playing.png') })
   const playbackResult = await playbackVideo.evaluate((video) => ({
     width: video.videoWidth,
     height: video.videoHeight,
@@ -379,7 +379,7 @@ try {
 
   const mobilePlaybackContext = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, reducedMotion: 'no-preference' })
   const mobilePlaybackPage = await mobilePlaybackContext.newPage()
-  await mobilePlaybackPage.goto(BASE_URL, { waitUntil: 'networkidle' })
+  await mobilePlaybackPage.goto(`${BASE_URL}/about`, { waitUntil: 'networkidle' })
   for (const code of ['MPI-480', 'A-014']) {
     const card = mobilePlaybackPage.locator('.product-card').filter({ hasText: code })
     await card.scrollIntoViewIfNeeded()
