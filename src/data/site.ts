@@ -18,7 +18,6 @@ export const site = {
     },
   },
   channels: [
-    { label: "Shopee", handle: "Gian hàng chính hãng", kind: "shop", url: "https://shopee.vn/shop/1930130462" },
     { label: "Facebook", handle: "TADORA", kind: "facebook", url: "https://www.facebook.com/share/14uvw1JXRwp/" },
     { label: "Instagram", handle: "@tadora.vn", kind: "instagram", url: "https://www.instagram.com/tadora.vn?exln=djdqcXF3MG04dzB6" },
     { label: "Threads", handle: "@tadoraaaaaaaa", kind: "threads", url: "https://www.threads.com/@tadoraaaaaaaa" },
@@ -31,5 +30,7 @@ export const navItems = [
   { id: "products", label: "Sản phẩm" },
   { id: "team", label: "Đội ngũ" },
   { id: "journey", label: "Hành trình" },
-  { id: "about-us", label: "Về chúng tôi" },
+  { id: "conversion", label: "Chuyển đổi Affiliate" },
+  { id: "activities", label: "Hoạt động" },
+  { id: "about-us", label: "Liên hệ" },
 ];

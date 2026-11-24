@@ -10,14 +10,18 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
+    "lint": "eslint src scripts/static-pages.ts vite.config.ts",
     "typecheck": "tsc -b",
-    "check": "npm run build",
+    "check": "npm run lint && npm run build",
     "images": "node scripts/optimize-images.mjs",
     "videos": "node scripts/optimize-videos.mjs",
-    "test:image-layout": "node scripts/verify-image-layout.mjs"
+    "test:image-layout": "node scripts/verify-image-layout.mjs",
+    "test:affiliate": "node scripts/verify-affiliate.mjs",
+    "test": "npm run test:affiliate && npm run test:image-layout"
   },
   "dependencies": {
     "@fontsource-variable/darker-grotesque": "^5.3.0",
+    "@fontsource-variable/montserrat": "^5.3.0",
     "@fontsource/be-vietnam-pro": "^5.3.0",
     "@vercel/analytics": "^2.0.1",
     "framer-motion": "^12.23.24",
@@ -26,15 +30,19 @@
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^22.20.5",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.20",
+    "eslint": "^10.15.0",
     "playwright": "^1.64.1",
     "postcss": "^8.4.49",
     "sharp": "^0.35.5",
     "tailwindcss": "^3.4.17",
     "typescript": "~5.6.3",
+    "typescript-eslint": "^8.74.0",
     "vite": "^6.0.1"
   }
 }

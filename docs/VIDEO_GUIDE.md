@@ -14,7 +14,7 @@ Mỗi sản phẩm dùng:
 
 Video nhận diện TADORA dùng:
 
-- `public/videos/logo-intro.mp4` — 16:9, phát một lần trong vùng logo của thanh điều hướng mỗi khi tải hoặc tải lại trang.
+- `public/videos/logo-intro.mp4` — 16:9, phát một lần trong vùng logo của thanh điều hướng khi tải hoặc tải lại `/about`.
 - WebM là tùy chọn. Nền video là `#fffaf3`, không tiếng, dài khoảng 3 giây và file nên dưới 2 MB.
 - Khi video kết thúc, giao diện chuyển sang ảnh logo tĩnh. Reduce Motion hoặc Data Saver sẽ bỏ qua video và hiển thị logo tĩnh ngay.
 
@@ -61,11 +61,13 @@ WebM là tùy chọn; đặt thuộc tính `landscape.webm` trong `src/data/site
 ## 3. Bật video trên website
 
 1. Chép MP4 vào đúng vị trí.
-2. Mở `src/data/videos.ts` và thêm cặp mã sản phẩm → slug vào `productVideoSlugs`, ví dụ: `'A-028': 'a-028'`.
+2. Mở `src/data/products.ts` và thêm cặp mã sản phẩm → slug vào `productVideoSlugs`, ví dụ: `'A-028': 'a-028'`. Video tự xuất hiện trong Video Hub.
 3. Nếu đã chép video nhận diện, đổi `logoVideoReady` trong `src/data/site.ts` thành `true`. Nếu có WebM, thay `landscape.webm: undefined` bằng đường dẫn file; nếu không, giữ nguyên `undefined` để trình duyệt không yêu cầu file thiếu.
 4. Chạy `npm run typecheck`, sau đó `npm run build`.
 
 Website không yêu cầu video sản phẩm nào khi `productVideoSlugs` rỗng, và không yêu cầu video logo khi `logoVideoReady` là `false`.
+
+Bài đăng TikTok đã xác nhận được thêm vào `tiktokVideos` trong `src/data/videos.ts`. Dùng thumbnail được phép công bố và URL bài đăng đầy đủ theo [tài liệu trình phát TikTok](https://developers.tiktok.com/docs/en/embed-player). Trình phát trong Video Hub tải khi người xem mở video.
 
 ## 4. Ảnh responsive
 

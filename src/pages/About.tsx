@@ -1,0 +1,1071 @@
+import {
+  AnimatePresence,
+  motion,
+  useMotionValue,
+  useReducedMotion,
+  useScroll,
+  useSpring,
+  useTransform,
+} from "framer-motion";
+import {
+  ArrowDown,
+  ArrowRight,
+  CalendarDays,
+  Cloud,
+  ExternalLink,
+  FileText,
+  FolderOpen,
+  Leaf,
+  School,
+  Sparkles,
+  Target,
+  Users,
+  Zap,
+} from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { LogoLockup } from "../components/LogoLockup";
+import { AffiliateButton } from "../components/Hub";
+import { projectActivity, projectResults } from "../data/project";
+import { productPath } from "../lib/routes";
+import { HeroProductVideo } from "../components/HeroProductVideo";
+import { Modal } from "../components/Modal";
+import { ProductCardMedia } from "../components/ProductCardMedia";
+import { SectionHeading } from "../components/SectionHeading";
+import { VideoPlayer } from "../components/VideoPlayer";
+import { products, productCategories, type CatalogProduct } from "../data/products";
+import { navItems, site } from "../data/site";
+import { team, type Member } from "../data/team";
+import { timeline } from "../data/timeline";
+import {
+  imageVariant,
+  markLazyImageLoaded,
+  responsiveImage,
+} from "../lib/images";
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 28 },
+  visible: { opacity: 1, y: 0 },
+};
+
+const journeyIcons = [Sparkles, School, Target, Zap, CalendarDays] as const;
+
+const introFacts = [
+  {
+    Icon: School,
+    label: "Đơn vị",
+    value: "PTIT",
+    detail: "Học viện Công nghệ Bưu chính Viễn thông",
+    accent: false,
+  },
+  {
+    Icon: Target,
+    label: "Nội dung dự thi",
+    value: "01",
+    detail: "Bán hàng Online",
+    accent: false,
+  },
+  {
+    Icon: CalendarDays,
+    label: "Hành trình",
+    value: "2026",
+    detail: "Từ 01.10 đến 05.12",
+    accent: false,
+  },
+  {
+    Icon: Zap,
+    label: "Tinh thần",
+    value: "Make it real.",
+    detail: "Từ ý tưởng đến tác động số",
+    accent: true,
+  },
+] as const;
+
+export default function About() {
+  const reduceMotion = useReducedMotion();
+  const [activeSection, setActiveSection] = useState("about");
+  const [selectedMember, setSelectedMember] = useState<Member | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<CatalogProduct | null>(null);
+  const [category, setCategory] = useState("Tất cả");
+  const [activeJourneyStep, setActiveJourneyStep] = useState(0);
+  const heroPointerX = useMotionValue(0);
+  const heroPointerY = useMotionValue(0);
+  const heroX = useSpring(heroPointerX, { stiffness: 110, damping: 22 });
+  const heroY = useSpring(heroPointerY, { stiffness: 110, damping: 22 });
+  const heroLeftX = useTransform(heroX, (value) => value * -0.65);
+  const heroLeftY = useTransform(heroY, (value) => value * 0.65);
+  const heroRightX = useTransform(heroX, (value) => value * 0.78);
+  const heroRightY = useTransform(heroY, (value) => value * -0.78);
+  const timelineRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll();
+  const scrollProgress = useSpring(scrollYProgress, {
+    stiffness: 120,
+    damping: 28,
+    restDelta: 0.001,
+  });
+  const { scrollYProgress: timelineScroll } = useScroll({
+    target: timelineRef,
+    offset: ["start 80%", "end 45%"],
+  });
+
+  const filteredProducts = useMemo(
+    () =>
+      category === "Tất cả"
+        ? products
+        : products.filter((product) => product.category === category),
+    [category],
+  );
+  const heroProduct = useMemo(
+    () => products.find((product) => product.code === "B-26"),
+    [],
+  );
+
+  const moveHero = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (
+      reduceMotion ||
+      !window.matchMedia("(hover: hover) and (pointer: fine)").matches
+    )
+      return;
+    const rect = event.currentTarget.getBoundingClientRect();
+    heroPointerX.set(((event.clientX - rect.left) / rect.width - 0.5) * 24);
+    heroPointerY.set(((event.clientY - rect.top) / rect.height - 0.5) * 24);
+  };
+
+  const resetHero = () => {
+    heroPointerX.set(0);
+    heroPointerY.set(0);
+  };
+
+  useEffect(() => {
+    let frame = 0;
+
+    const syncActiveSection = () => {
+      frame = 0;
+      const marker = window.scrollY + window.innerHeight * 0.38;
+      const sections = navItems
+        .map(({ id }) => ({ id, element: document.getElementById(id) }))
+        .filter(
+          (section): section is { id: string; element: HTMLElement } =>
+            !!section.element,
+        );
+
+      let currentId = sections[0]?.id ?? "about";
+      sections.forEach(({ id, element }) => {
+        if (element.offsetTop <= marker) currentId = id;
+      });
+
+      const atPageEnd =
+        window.scrollY + window.innerHeight >=
+        document.documentElement.scrollHeight - 4;
+      if (atPageEnd && sections.length)
+        currentId = sections[sections.length - 1].id;
+      setActiveSection(currentId);
+    };
+
+    const scheduleSync = () => {
+      if (!frame) frame = window.requestAnimationFrame(syncActiveSection);
+    };
+
+    syncActiveSection();
+    window.addEventListener("scroll", scheduleSync, { passive: true });
+    window.addEventListener("resize", scheduleSync);
+    return () => {
+      if (frame) window.cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", scheduleSync);
+      window.removeEventListener("resize", scheduleSync);
+    };
+  }, []);
+
+  const scrollTo = (id: string) => {
+    setActiveSection(id);
+    document
+      .getElementById(id)
+      ?.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth" });
+  };
+
+  return (
+    <div className="portfolio-page">
+      <motion.div
+        className="scroll-progress"
+        style={{ scaleX: scrollProgress }}
+        aria-hidden="true"
+      />
+      <section className="hero" id="top">
+        <div className="hero-grain" aria-hidden="true" />
+        <div className="hero-shell">
+          <motion.div
+            className="hero-copy"
+            initial={reduceMotion ? false : "hidden"}
+            animate="visible"
+            variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
+          >
+            <motion.div className="hero-kicker" variants={fadeUp}>
+              <span>
+                <Sparkles size={15} /> DBC 2026
+              </span>
+              <span className="hero-kicker-line" />
+              <span>Bán hàng online</span>
+            </motion.div>
+            <motion.p className="hero-overline" variants={fadeUp}>
+              TADORA · Dự án của sinh viên PTIT
+            </motion.p>
+            <motion.h1 variants={fadeUp}>
+              Tiện ích trong tay.
+              <br />
+              <em>Chăm mình mỗi ngày.</em>
+            </motion.h1>
+            <motion.p className="hero-slogan" variants={fadeUp}>
+              {site.message}
+            </motion.p>
+            <motion.p className="hero-lead" variants={fadeUp}>
+              Hành trình kinh doanh số của đội {site.teamName}, sinh viên PTIT
+              — nơi ý tưởng trẻ gặp những sản phẩm tiện ích được kể bằng một
+              ngôn ngữ gần gũi, tươi mới.
+            </motion.p>
+            <motion.div className="hero-actions" variants={fadeUp}>
+              <button
+                className="button button-dark"
+                onClick={() => scrollTo("products")}
+              >
+                Xem bộ sưu tập <ArrowDown size={18} />
+              </button>
+              <button className="text-link" onClick={() => scrollTo("team")}>
+                Gặp đội ngũ <Users size={17} />
+              </button>
+            </motion.div>
+          </motion.div>
+
+          <div
+            className="hero-visual"
+            aria-label="Sản phẩm nổi bật của TADORA"
+            onPointerMove={moveHero}
+            onPointerLeave={resetHero}
+          >
+            <motion.div
+              className="hero-sun"
+              animate={
+                reduceMotion ? {} : { scale: [1, 1.05, 1], rotate: [0, 3, 0] }
+              }
+              transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+            />
+            <motion.figure
+              className="hero-card hero-card-main"
+              initial={reduceMotion ? false : { opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.85, delay: 0.2 }}
+              style={{ x: heroX, y: heroY }}
+            >
+              <div className="hero-phone-island" aria-hidden="true" />
+              <div className="hero-phone-screen">
+                <img
+                  className="hero-phone-poster"
+                  src={
+                    responsiveImage("/assets/products/78.webp", "product").src
+                  }
+                  srcSet={
+                    responsiveImage("/assets/products/78.webp", "product")
+                      .srcSet
+                  }
+                  sizes="(min-width: 1281px) 340px, (min-width: 1051px) 310px, (min-width: 721px) 320px, 240px"
+                  alt="Bàn chải điện Magic B26"
+                  width="720"
+                  height="1280"
+                  loading="eager"
+                />
+                <HeroProductVideo
+                  product={heroProduct}
+                  poster={imageVariant("/assets/products/78.webp", 960)}
+                />
+              </div>
+            </motion.figure>
+            <motion.figure
+              className="hero-card hero-card-left"
+              style={{ x: heroLeftX, y: heroLeftY }}
+            >
+              <img
+                src={imageVariant("/assets/products/01.webp", 480)}
+                srcSet={
+                  responsiveImage("/assets/products/01.webp", "product").srcSet
+                }
+                sizes="210px"
+                alt="Bình giữ nhiệt Magic MPI-480"
+                width="480"
+                height="480"
+                loading="eager"
+              />
+            </motion.figure>
+            <motion.figure
+              className="hero-card hero-card-right"
+              style={{ x: heroRightX, y: heroRightY }}
+            >
+              <img
+                src={imageVariant("/assets/products/80.webp", 480)}
+                srcSet={
+                  responsiveImage("/assets/products/80.webp", "product").srcSet
+                }
+                sizes="220px"
+                alt="Bàn chải điện Magic B26"
+                width="480"
+                height="480"
+                loading="eager"
+              />
+            </motion.figure>
+            <motion.div
+              className="hero-seal"
+              style={{ x: heroLeftX, y: heroLeftY }}
+            >
+              <Leaf />
+              <span>
+                Curated
+                <br />
+                for daily life
+              </span>
+            </motion.div>
+          </div>
+        </div>
+        <div className="hero-marquee" aria-hidden="true">
+          <div>
+            <span>SMART LIVING</span>
+            <i>✦</i>
+            <span>YOUNG ENERGY</span>
+            <i>✦</i>
+            <span>DIGITAL COMMERCE</span>
+            <i>✦</i>
+            <span>TADORA 2026</span>
+            <i>✦</i>
+            <span>SMART LIVING</span>
+            <i>✦</i>
+            <span>YOUNG ENERGY</span>
+            <i>✦</i>
+          </div>
+        </div>
+      </section>
+
+      <nav className="portfolio-nav container" aria-label="Các phần của dự án">
+        {navItems.map((item) => (
+          <a key={item.id} href={`#${item.id}`} aria-current={activeSection === item.id ? "location" : undefined}>
+            {item.label}
+          </a>
+        ))}
+      </nav>
+
+      <section className="section intro-section" id="about">
+        <span className="intro-ambient intro-ambient-one" aria-hidden="true" />
+        <span className="intro-ambient intro-ambient-two" aria-hidden="true" />
+        <div className="container">
+          <div className="intro-grid">
+            <motion.div
+              className="intro-sticky"
+              initial={reduceMotion ? false : "hidden"}
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.3 }}
+              variants={fadeUp}
+            >
+              <span className="eyebrow">01 · CÂU CHUYỆN TADORA</span>
+              <h2>
+                Một thương hiệu.
+                <br />
+                Một hành trình <em>rất trẻ.</em>
+              </h2>
+              <div className="intro-sticky-foot">
+                <Sparkles />
+                <span>{site.teamName} · PTIT</span>
+              </div>
+            </motion.div>
+            <motion.div
+              className="intro-content"
+              initial={reduceMotion ? false : { opacity: 0, y: 28 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ duration: 0.65 }}
+            >
+              <motion.p
+                className="intro-big"
+                initial={reduceMotion ? false : { opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+              >
+                TADORA là thương hiệu kinh doanh số được xây dựng bởi đội “{site.teamName}” —
+                các sinh viên Học viện Công nghệ Bưu chính Viễn thông tham gia
+                Cuộc thi Sinh viên Kinh doanh số 2026.
+              </motion.p>
+              <p>
+                Chúng mình đưa kiến thức trên giảng đường vào trải nghiệm kinh
+                doanh thực tế, từ nghiên cứu sản phẩm và xây dựng nội dung đến
+                vận hành các kênh số. Giai đoạn hiện tại tập trung vào nội dung
+                trải nghiệm sản phẩm và TikTok Shop Affiliate.
+              </p>
+              <div className="fact-grid">
+                {introFacts.map(
+                  ({ Icon, label, value, detail, ...fact }, index) => (
+                    <motion.article
+                      key={label}
+                      className={fact.accent ? "fact-accent" : ""}
+                      initial={
+                        reduceMotion
+                          ? false
+                          : {
+                              opacity: 0,
+                              y: 24,
+                              rotate: index % 2 ? 1.5 : -1.5,
+                            }
+                      }
+                      whileInView={{ opacity: 1, y: 0, rotate: 0 }}
+                      viewport={{ once: true, amount: 0.3 }}
+                      transition={{ delay: reduceMotion ? 0 : index * 0.08 }}
+                      whileHover={
+                        reduceMotion
+                          ? undefined
+                          : { y: -9, rotate: index % 2 ? 1 : -1 }
+                      }
+                      whileTap={reduceMotion ? undefined : { scale: 0.97 }}
+                    >
+                      <span className="fact-index">
+                        {String(index + 1).padStart(2, "0")}
+                      </span>
+                      <span className="fact-icon">
+                        <Icon />
+                      </span>
+                      <span className="fact-label">{label}</span>
+                      <strong>{value}</strong>
+                      <small>{detail}</small>
+                      <span className="fact-shine" aria-hidden="true" />
+                    </motion.article>
+                  ),
+                )}
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      <section className="section proposal-section" id="proposal">
+        <div className="container">
+          <motion.div
+            className="proposal-panel"
+            initial={reduceMotion ? false : { opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.25 }}
+            transition={{ duration: 0.65 }}
+          >
+            <span className="proposal-grid" aria-hidden="true" />
+            <motion.span
+              className="proposal-spotlight proposal-spotlight-one"
+              aria-hidden="true"
+              animate={reduceMotion ? {} : { x: [0, 32, 0], y: [0, -18, 0] }}
+              transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
+            />
+            <motion.span
+              className="proposal-spotlight proposal-spotlight-two"
+              aria-hidden="true"
+              animate={reduceMotion ? {} : { x: [0, -24, 0], y: [0, 20, 0] }}
+              transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+            />
+
+            <div className="proposal-copy">
+              <div className="proposal-topline">
+                <span className="eyebrow">02 · HỒ SƠ ĐỀ ÁN</span>
+                <span className="proposal-live">
+                  <i /> DRIVE LIVE
+                </span>
+              </div>
+              <h2>
+                Đề án TADORA.
+                <br />
+                <em>Chạm để khám phá.</em>
+              </h2>
+              <p>
+                Một điểm truy cập duy nhất cho toàn bộ hồ sơ và tài liệu của
+                đội {site.teamName} dành cho thương hiệu TADORA tại Cuộc thi
+                Sinh viên Kinh doanh số 2026.
+              </p>
+              <div className="proposal-tags" aria-label="Thông tin đề án">
+                <span><FolderOpen /> Hồ sơ tổng hợp</span>
+                <span><Cloud /> Cập nhật trên Drive</span>
+                <span><Sparkles /> DBC 2026</span>
+              </div>
+              <a
+                className="proposal-button"
+                href={site.proposalUrl}
+                target="_blank"
+                rel="noreferrer"
+              >
+                <span className="proposal-button-icon">
+                  <FolderOpen />
+                </span>
+                <span>
+                  <small>KHÁM PHÁ TRÊN GOOGLE DRIVE</small>
+                  <strong>Mở toàn bộ đề án</strong>
+                </span>
+                <span className="proposal-button-arrow">
+                  <ExternalLink />
+                </span>
+              </a>
+              <span className="proposal-note">
+                <i /> Mở trong tab mới · Nội dung được đồng bộ trên Drive
+              </span>
+            </div>
+
+            <div className="proposal-visual" aria-hidden="true">
+              <span className="proposal-orbit proposal-orbit-one" />
+              <span className="proposal-orbit proposal-orbit-two" />
+              <motion.div
+                className="proposal-float-card proposal-float-card-one"
+                animate={reduceMotion ? {} : { y: [0, -10, 0], rotate: [-4, -1, -4] }}
+                transition={{ duration: 4.8, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <span><FileText /></span>
+                <div><small>TÀI LIỆU</small><strong>Hồ sơ tổng hợp</strong></div>
+              </motion.div>
+              <motion.div
+                className="proposal-float-card proposal-float-card-two"
+                animate={reduceMotion ? {} : { y: [0, 9, 0], rotate: [4, 1, 4] }}
+                transition={{ duration: 5.6, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <span><Cloud /></span>
+                <div><small>TRẠNG THÁI</small><strong>Luôn sẵn sàng</strong></div>
+              </motion.div>
+
+              <motion.div
+                className="proposal-folder-wrap"
+                animate={reduceMotion ? {} : { y: [0, -12, 0], rotate: [-3, -.5, -3] }}
+                transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <div className="proposal-folder">
+                  <span className="proposal-folder-tab">QUÁ TAM BA BẬN · DBC 2026</span>
+                  <div className="proposal-folder-toolbar">
+                    <span /><span /><span />
+                    <small>drive.google.com</small>
+                  </div>
+                  <div className="proposal-folder-content">
+                    <span className="proposal-folder-cloud"><Cloud /></span>
+                    <small>PROJECT HUB</small>
+                    <strong>ĐỀ ÁN</strong>
+                    <span className="proposal-folder-sub">HỒ SƠ TỔNG HỢP</span>
+                    <span className="proposal-folder-line"><i /></span>
+                  </div>
+                </div>
+              </motion.div>
+
+              <motion.div
+                className="proposal-document proposal-document-back"
+                animate={reduceMotion ? {} : { y: [0, 8, 0], rotate: [9, 6, 9] }}
+                transition={{ duration: 6.2, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <span className="proposal-document-icon"><FileText /></span>
+                <small>DBC 2026</small>
+                <strong>TADORA</strong>
+                <span />
+                <span />
+                <span />
+              </motion.div>
+              <div className="proposal-badge">
+                <span className="proposal-badge-ring" />
+                <Sparkles />
+                <span>OPEN<br />PROJECT</span>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      <section className="section products-section" id="products">
+        <div className="container">
+          <SectionHeading
+            eyebrow="03 · BỘ SƯU TẬP MAGIC"
+            title="Nhỏ gọn trong nhà. Tiện lợi ngoài phố."
+            description="Những sản phẩm tiện ích được chọn cho nhịp sống học tập, làm việc và di chuyển mỗi ngày."
+          />
+          <div className="filters" role="group" aria-label="Lọc sản phẩm">
+            {["Tất cả", ...productCategories].map((item) => (
+              <button
+                key={item}
+                onClick={() => setCategory(item)}
+                className={category === item ? "active" : ""}
+                aria-pressed={category === item}
+              >
+                {item}
+              </button>
+            ))}
+          </div>
+          <motion.div className="products-grid" layout>
+            <AnimatePresence mode="popLayout">
+              {filteredProducts.map((product, index) => (
+                <motion.button
+                  layout
+                  key={product.code}
+                  className={
+                    "product-card " +
+                    (index === 0 ? "product-card-featured" : "")
+                  }
+                  onClick={() => setSelectedProduct(product)}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.96 }}
+                  transition={{ duration: 0.35 }}
+                >
+                  <ProductCardMedia product={product} featured={index === 0} />
+                  <div className="product-copy">
+                    <small>{product.category}</small>
+                    <h3>{product.name.replace("MAGIC ", "")}</h3>
+                    <p>{product.description}</p>
+                    <span className="product-arrow">
+                      <ArrowRight size={19} />
+                    </span>
+                  </div>
+                </motion.button>
+              ))}
+            </AnimatePresence>
+          </motion.div>
+        </div>
+      </section>
+
+      <section className="story-band">
+        <span className="story-orb story-orb-one" aria-hidden="true" />
+        <span className="story-orb story-orb-two" aria-hidden="true" />
+        <div className="container story-band-grid">
+          <motion.div
+            className="story-copy"
+            initial={reduceMotion ? false : { opacity: 0, x: -28 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, amount: 0.35 }}
+          >
+            <span className="eyebrow">PHƯƠNG PHÁP LÀM DỰ ÁN</span>
+            <h2>
+              Học bằng cách
+              <br />
+              <em>thực sự bắt tay làm.</em>
+            </h2>
+            <p className="story-lead">
+              Mỗi bước đều được thử nghiệm bằng công việc thật, dữ liệu thật và
+              những lần điều chỉnh thật.
+            </p>
+            <div className="story-signal">
+              <span />
+              <strong>LEARN · BUILD · IMPROVE</strong>
+            </div>
+          </motion.div>
+          <div className="story-steps">
+            {[
+              ["01", "Research", "Hiểu sản phẩm, thị trường và khách hàng."],
+              [
+                "02",
+                "Strategy",
+                "Định hình nội dung và trải nghiệm thương hiệu.",
+              ],
+              ["03", "Execution", "Triển khai nội dung và theo dõi hiệu quả trên các kênh số."],
+              ["04", "Measure", "Quan sát dữ liệu, học hỏi và cải tiến."],
+            ].map(([number, title, description], index) => (
+              <motion.article
+                key={number}
+                initial={reduceMotion ? false : { opacity: 0, x: 24 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, amount: 0.4 }}
+                transition={{ delay: reduceMotion ? 0 : index * 0.08 }}
+                whileHover={reduceMotion ? undefined : { x: 10, scale: 1.01 }}
+                whileTap={reduceMotion ? undefined : { scale: 0.98 }}
+              >
+                <span className="story-step-number">{number}</span>
+                <div>
+                  <h3>{title}</h3>
+                  <p>{description}</p>
+                </div>
+                <span className="story-step-arrow">
+                  <ArrowRight />
+                </span>
+              </motion.article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="section team-section" id="team">
+        <div className="container">
+          <SectionHeading
+            eyebrow="04 · QUÁ TAM BA BẬN"
+            title="Năm cá tính. Một đội không bỏ cuộc."
+            description="Quá tam ba bận là đội ngũ đứng sau TADORA — năm góc nhìn khác nhau cùng gặp nhau ở tinh thần học hỏi và dám biến ý tưởng thành hành động."
+          />
+          <div className="team-grid">
+            {team.map((member, index) => (
+              <motion.button
+                key={member.name}
+                className={"member-card member-card-" + (index + 1)}
+                onClick={() => setSelectedMember(member)}
+                initial={reduceMotion ? false : { opacity: 0, y: 28 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ delay: index * 0.06 }}
+              >
+                <img
+                  src={responsiveImage(member.image, "team").src}
+                  srcSet={responsiveImage(member.image, "team").srcSet}
+                  sizes="(min-width: 721px) 58vw, calc(100vw - 28px)"
+                  alt={"Chân dung " + member.name}
+                  width={member.imageWidth}
+                  height={member.imageHeight}
+                  loading="lazy"
+                  className="lazy-image"
+                  onLoad={markLazyImageLoaded}
+                  style={{ objectPosition: member.imagePosition }}
+                />
+                <div className="member-shade" />
+                <span className="member-number">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <div className="member-info">
+                  <small>{member.role}</small>
+                  <h3>{member.name}</h3>
+                  <p>{member.className}</p>
+                </div>
+                <span className="member-open">
+                  <ArrowRight size={18} />
+                </span>
+              </motion.button>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="section journey-section" id="journey">
+        <div className="container">
+          <div className="journey-heading">
+            <div>
+              <span className="eyebrow">05 · OUR JOURNEY</span>
+              <h2>
+                Từng bước nhỏ.
+                <br />
+                Một hành trình <em>có thật.</em>
+              </h2>
+            </div>
+            <p>
+              Lộ trình ban đầu của đề án ghi lại cách đội dự kiến đi từ khởi
+              động đến đo lường, trước khi chuyển trọng tâm sang TikTok Affiliate.
+            </p>
+          </div>
+          <motion.div
+            className="journey-live"
+            initial={reduceMotion ? false : { opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.35 }}
+          >
+            <div className="journey-live-index" aria-hidden="true">
+              <span>BƯỚC</span>
+              <strong>{String(activeJourneyStep + 1).padStart(2, "0")}</strong>
+              <small>/ {String(timeline.length).padStart(2, "0")}</small>
+            </div>
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                className="journey-live-copy"
+                key={timeline[activeJourneyStep].label}
+                initial={reduceMotion ? false : { opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={reduceMotion ? undefined : { opacity: 0, y: -10 }}
+                transition={{ duration: 0.25 }}
+                aria-live="polite"
+              >
+                <small>
+                  {timeline[activeJourneyStep].state === "in-progress"
+                    ? "ĐÃ KHỞI ĐỘNG"
+                    : "KẾ HOẠCH BAN ĐẦU"}
+                </small>
+                <h3>{timeline[activeJourneyStep].label}</h3>
+                <p>{timeline[activeJourneyStep].detail}</p>
+              </motion.div>
+            </AnimatePresence>
+          </motion.div>
+          <div className="timeline" ref={timelineRef}>
+            <motion.span
+              className="timeline-progress"
+              style={{ scaleY: timelineScroll }}
+              aria-hidden="true"
+            />
+            {timeline.map((item, index) => {
+              const JourneyIcon = journeyIcons[index];
+              const isActive = activeJourneyStep === index;
+              return (
+                <motion.article
+                  key={item.label}
+                  className={`${isActive ? "is-active" : ""} ${index < activeJourneyStep ? "is-complete" : ""}`}
+                  initial={reduceMotion ? false : { opacity: 0, y: 22 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.35 }}
+                  transition={{ delay: reduceMotion ? 0 : index * 0.07 }}
+                  onPointerEnter={() => setActiveJourneyStep(index)}
+                >
+                  <motion.button
+                    type="button"
+                    className="timeline-step"
+                    aria-pressed={isActive}
+                    onClick={() => setActiveJourneyStep(index)}
+                    onFocus={() => setActiveJourneyStep(index)}
+                    whileTap={reduceMotion ? undefined : { scale: 0.97 }}
+                  >
+                    <span className={"timeline-node " + item.state}>
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                    <span className="timeline-card">
+                      <span className="timeline-card-top">
+                        <small>
+                          {item.state === "in-progress"
+                            ? "ĐÃ KHỞI ĐỘNG"
+                            : "KẾ HOẠCH BAN ĐẦU"}
+                        </small>
+                        <span className="timeline-card-icon">
+                          <JourneyIcon />
+                        </span>
+                      </span>
+                      <strong>{item.label}</strong>
+                      <span className="timeline-card-detail">
+                        {item.detail}
+                      </span>
+                      <span className="timeline-card-cta">
+                        Khám phá bước này <ArrowRight />
+                      </span>
+                    </span>
+                  </motion.button>
+                </motion.article>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      <section className="hub-section hub-wrap" id="conversion">
+        <div className="hub-heading">
+          <h2>Hành trình chuyển đổi mô hình kinh doanh</h2>
+        </div>
+        <div className="hub-project-grid">
+          <article>
+            <p className="hub-label">Giai đoạn trước</p>
+            <h3>Kinh doanh đa kênh</h3>
+            <p>Đội hình thành thương hiệu, nghiên cứu thị trường và chọn sản phẩm MAGIC. Nhóm xây dựng đề án truyền thông và kinh doanh số qua nhiều kênh.</p>
+          </article>
+          <article>
+            <p className="hub-label">Giai đoạn hiện tại</p>
+            <h3>TikTok Shop Affiliate</h3>
+            <p>Theo định hướng mới của DBC 2026, đội tập trung sản xuất video, bài viết và hướng dẫn. Liên kết tiếp thị dẫn người xem đến TikTok Shop để kiểm tra giá và đặt hàng.</p>
+          </article>
+          <article>
+            <p className="hub-label">Kế hoạch tiếp theo</p>
+            <h3>Đo lường và tổng kết</h3>
+            <p>Đội theo dõi chủ đề, sản phẩm và nội dung nhận được sự quan tâm. Kết quả đơn hàng và hoa hồng sẽ được đối chiếu với báo cáo TikTok Affiliate Center.</p>
+          </article>
+        </div>
+      </section>
+
+      <section className="hub-section hub-wrap" id="brand-story">
+        <div className="hub-project-grid hub-project-grid--pair">
+          <article>
+            <LogoLockup />
+            <h2>Thương hiệu TADORA</h2>
+            <p><strong>{site.message}</strong> TADORA ghi lại cách đội PTIT đưa ý tưởng trên giảng đường vào một dự án kinh doanh số. Sản phẩm được chọn xoay quanh việc chăm sóc bản thân và những nhu cầu thiết thực mỗi ngày.</p>
+            <p>Logo chữ TADORA với nét nghiêng và tông đen là dấu hiệu nhận diện chung trên website, đề án và nội dung của nhóm.</p>
+          </article>
+          <article id="magic">
+            <p className="hub-label">Đối tác sản phẩm</p>
+            <h2>MAGIC</h2>
+            <p>MAGIC đồng hành với TADORA về sản phẩm tại DBC 2026. Bộ sưu tập dự án gồm các thiết bị chăm sóc cá nhân, bình giữ nhiệt và quạt sạc.</p>
+            <a className="hub-text-link" href="/products">Xem bộ sưu tập MAGIC</a>
+          </article>
+        </div>
+      </section>
+
+      <section className="hub-section hub-wrap" id="activities">
+        <div className="hub-heading"><h2>Hoạt động và thành tựu</h2></div>
+        <p>Hồ sơ đề án, website TADORA, danh mục và bộ video sản phẩm là các tài liệu dự án hiện có.</p>
+        <a className="hub-text-link" href="#proposal">Xem hồ sơ đề án</a>
+        {projectActivity.length > 0 && (
+          <div className="hub-card-grid">
+            {projectActivity.map((item) => (
+              <figure key={item.src}>
+                {item.kind === "image"
+                  ? <img src={item.src} alt={item.caption} width={item.width} height={item.height} loading="lazy" />
+                  : <video src={item.src} aria-label={item.caption} controls preload="none" playsInline />}
+                <figcaption>{item.caption}</figcaption>
+              </figure>
+            ))}
+          </div>
+        )}
+        {projectResults.length > 0 && (
+          <ul>{projectResults.map((item) => <li key={item.title}><a href={item.sourceUrl}>{item.title}</a> · {item.date}</li>)}</ul>
+        )}
+      </section>
+
+      <section className="closing-section">
+        <div className="closing-shell">
+          <div className="closing-art" aria-hidden="true">
+            <span className="closing-orbit closing-orbit-one" />
+            <span className="closing-orbit closing-orbit-two" />
+            <motion.img
+              className="closing-product closing-product-main lazy-image"
+              src={responsiveImage("/assets/products/50.webp", "product").src}
+              srcSet={
+                responsiveImage("/assets/products/50.webp", "product").srcSet
+              }
+              sizes="(min-width: 721px) 360px, 225px"
+              width="960"
+              height="960"
+              alt=""
+              loading="lazy"
+              onLoad={markLazyImageLoaded}
+              animate={
+                reduceMotion ? {} : { y: [0, -10, 0], rotate: [-5, -3, -5] }
+              }
+              transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+            />
+            <motion.img
+              className="closing-product closing-product-top lazy-image"
+              src={responsiveImage("/assets/products/62.webp", "product").src}
+              srcSet={
+                responsiveImage("/assets/products/62.webp", "product").srcSet
+              }
+              sizes="(min-width: 721px) 225px, 135px"
+              width="960"
+              height="960"
+              alt=""
+              loading="lazy"
+              onLoad={markLazyImageLoaded}
+              animate={reduceMotion ? {} : { y: [0, 8, 0], rotate: [7, 5, 7] }}
+              transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
+            />
+            <motion.img
+              className="closing-product closing-product-bottom lazy-image"
+              src={responsiveImage("/assets/products/76.webp", "product").src}
+              srcSet={
+                responsiveImage("/assets/products/76.webp", "product").srcSet
+              }
+              sizes="(min-width: 721px) 210px, 130px"
+              width="960"
+              height="960"
+              alt=""
+              loading="lazy"
+              onLoad={markLazyImageLoaded}
+              animate={reduceMotion ? {} : { y: [0, -7, 0], rotate: [4, 6, 4] }}
+              transition={{
+                duration: 6.5,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            />
+            <div className="closing-badge">
+              <Sparkles size={18} /> TADORA · 2026
+            </div>
+          </div>
+          <div className="closing-copy">
+            <span className="eyebrow">FROM IDEA TO IMPACT</span>
+            <h2>
+              Ý tưởng nhỏ.
+              <br />
+              <em>Dấu ấn thật.</em>
+            </h2>
+            <p>
+              Mỗi sản phẩm là một cơ hội để đội {site.teamName} thử nghiệm, học
+              hỏi và phát triển TADORA từ kiến thức trên giảng đường thành trải
+              nghiệm kinh doanh số thực tế.
+            </p>
+            <div className="closing-actions">
+              <a className="button button-light" href="/products">Khám phá sản phẩm</a>
+              <a className="closing-top-link" href="/">Về trang chủ</a>
+              <a className="closing-top-link" href="#top">Trở về đầu trang</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <Modal
+        open={!!selectedMember}
+        title="Thông tin thành viên"
+        onClose={() => setSelectedMember(null)}
+      >
+        {selectedMember && (
+          <div className="member-modal">
+            <img
+              src={responsiveImage(selectedMember.image, "team").src}
+              srcSet={responsiveImage(selectedMember.image, "team").srcSet}
+              sizes="(min-width: 721px) 420px, calc(100vw - 64px)"
+              alt={"Chân dung " + selectedMember.name}
+              width={selectedMember.imageWidth}
+              height={selectedMember.imageHeight}
+              style={{ objectPosition: selectedMember.imagePosition }}
+            />
+            <div>
+              <span className="eyebrow">THÀNH VIÊN · {site.teamName}</span>
+              <h2>{selectedMember.name}</h2>
+              <p>{selectedMember.role}</p>
+              <dl>
+                <div>
+                  <dt>Mã sinh viên</dt>
+                  <dd>{selectedMember.studentId}</dd>
+                </div>
+                <div>
+                  <dt>Lớp</dt>
+                  <dd>{selectedMember.className}</dd>
+                </div>
+                <div>
+                  <dt>Khoa</dt>
+                  <dd>{selectedMember.faculty}</dd>
+                </div>
+                <div>
+                  <dt>Trường</dt>
+                  <dd>{site.school}</dd>
+                </div>
+              </dl>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      <Modal
+        open={!!selectedProduct}
+        title="Ảnh & video sản phẩm"
+        onClose={() => setSelectedProduct(null)}
+      >
+        {selectedProduct && (
+          <div
+            className={`product-modal ${selectedProduct.video ? "product-modal--video" : ""}`}
+          >
+            {selectedProduct.video && (
+              <div className="product-modal-video">
+                <VideoPlayer
+                  src={selectedProduct.video.src}
+                  poster={selectedProduct.video.poster}
+                  ratio="9/16"
+                  loop
+                  autoPlayInView
+                />
+              </div>
+            )}
+            <div className="product-modal-content">
+              <div className="product-modal-heading">
+                <span className="eyebrow">
+                  {selectedProduct.category} · {selectedProduct.code}
+                </span>
+                <h2>{selectedProduct.name}</h2>
+                <p>{selectedProduct.description}</p>
+                <div className="hub-actions">
+                  <a className="hub-button hub-button--outline" href={productPath(selectedProduct)}>Xem đánh giá</a>
+                  <AffiliateButton product={selectedProduct} position="portfolio_gallery" />
+                </div>
+              </div>
+              <div className="product-gallery">
+                {selectedProduct.gallery.map((image, index) => (
+                  <img
+                    key={image}
+                    src={imageVariant(image, 960)}
+                    alt={selectedProduct.name + " — hình " + (index + 1)}
+                    loading={index < 2 ? "eager" : "lazy"}
+                    className={index < 2 ? undefined : "lazy-image"}
+                    onLoad={index < 2 ? undefined : markLazyImageLoaded}
+                    decoding="async"
+                    width="960"
+                    height="960"
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </Modal>
+    </div>
+  );
+}
